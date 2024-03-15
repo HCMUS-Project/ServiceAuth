@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SignInService } from './sign-in.service';
 import { SignInController } from './sign-in.controller';
-import {UserSchema} from "../../models/user/schemas/user.schema";
+import {UserSchema} from "../../../models/user/schemas/user.schema";
 // @ts-ignore
 import {MongooseModule} from "@nestjs/mongoose";
 

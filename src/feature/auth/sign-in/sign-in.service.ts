@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateSignInDto } from './dto/create-sign-in.dto';
 import { UpdateSignInDto } from './dto/update-sign-in.dto';
 import { Model } from 'mongoose';
-import { User } from "../../models/user/schemas/user.schema";
+import { User } from "../../../models/user/schemas/user.schema";
 import { compare } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 @Injectable()
