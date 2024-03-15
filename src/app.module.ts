@@ -12,9 +12,10 @@ import { ContextModule } from './configs/context/modules/contextStorage.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './core/responses/interceptors/response.interceptor';
 import { DatabaseModule } from './core/database/modules/database.module';
+import {SignUpModule} from './feature/auth/sign_up/sign_up.module';
 
 @Module({
-    imports: [LoggerModule, ConfigsModule, ContextModule, DatabaseModule],
+    imports: [LoggerModule, ConfigsModule, ContextModule, DatabaseModule, SignUpModule],
     controllers: [AppController],
     providers: [AppService, { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor }],
 })
