@@ -1,14 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { Sign_inService } from './sign_in.service';
-import { CreateSignInDto } from './dto/create-sign-in.dto';
-import { UpdateSignInDto } from './dto/update-sign-in.dto';
+import { SignInService } from './sign_in.service';
+import { signInDto } from './dto/sign_in.dto';
 
-@Controller('auth/signin')
-export class Sign_inController {
-  constructor(private readonly signInService: Sign_inService) {}
+@Controller('auth')
+export class SignInController {
+  constructor(private readonly signInService: SignInService) {}
 
-  @Post()
-  async signIn(@Body() createSignInDto: CreateSignInDto) {
-    return await this.signInService.signIn(createSignInDto);
+  @Post('/signin')
+  async signIn(@Body() signInDto: signInDto) {
+    return await this.signInService.signIn(signInDto);
   }
 }

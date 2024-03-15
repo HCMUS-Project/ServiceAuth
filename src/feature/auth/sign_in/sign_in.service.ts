@@ -1,24 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { CreateSignInDto } from './dto/create-sign-in.dto';
-import { UpdateSignInDto } from './dto/update-sign-in.dto';
-import { Model } from 'mongoose';
+import {  Inject, Injectable } from '@nestjs/common';
+import { signInDto } from './dto/sign_in.dto';
 import { User } from "../../../models/user/schemas/user.schema";
-import { compare } from 'bcrypt';
-import { InjectModel } from '@nestjs/mongoose';
+import * as argon from 'argon2';
+import { Model } from 'mongoose';
+
 @Injectable()
-export class Sign_inService {
-  constructor(@InjectModel('user') private readonly userModel: Model<User>) {}
-  async signIn(createSignInDto: CreateSignInDto): Promise<any> {
-    const user = await this.userModel.findOne({ email: createSignInDto.email }).select('+password');
+export class SignInService {
+  constructor(@Inject('USER_MODEL') private readonly User: Model<User>) {
+  }
 
-    if (!user) {
-      return { message: 'User not found' };
-    }
-    const isPasswordMatch = await compare(createSignInDto.password, user.password);
-    if (!isPasswordMatch) {
-      return { message: 'Invalid password' };
-    }
+  async signIn(signInDto: signInDto): Promise<any> {
+    try {
+      const user = await this.User.findOne({email: signInDto.email}).select('+password')
 
-    return { message: 'Login succesful' };
+      if (!user) {
+        return {message: 'User not found'};
+      }
+
+      const isPasswordMatch = await argon.verify(user.password, signInDto.password);
+      if (!isPasswordMatch) {
+        return {message: 'Invalid password'};
+      }
+
+      return {message: 'Login successful'};
+    } catch (error) {
+      return {message: error.message};
+    }
   }
 }

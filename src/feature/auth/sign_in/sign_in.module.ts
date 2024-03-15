@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
-import { Sign_inService } from './sign_in.service';
-import { Sign_inController } from './sign_in.controller';
+import { SignInService } from './sign_in.service';
+import { SignInController } from './sign_in.controller';
+import {DatabaseModule} from 'src/core/database/modules/database.module';
 import {UserSchema} from "../../../models/user/schemas/user.schema";
 // @ts-ignore
 import {MongooseModule} from "@nestjs/mongoose";
+import {signInProviders} from "./sign_in.provider";
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: "user", schema: UserSchema }])],
-  controllers: [Sign_inController],
-  providers: [Sign_inService],
+  imports: [DatabaseModule],
+  controllers: [SignInController],
+  providers: [SignInService, ...signInProviders],
 })
-export class Sign_inModule {}
+export class SignInModule {}

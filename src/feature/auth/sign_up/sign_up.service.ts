@@ -8,13 +8,17 @@ import { signUp } from './interfaces/sign_up.interface';
 @Injectable()
 export class SignUpService
 {
-  constructor(@Inject('SIGN_UP_MODEL') private readonly signUpModel: Model<signUp>) {}
+  constructor(@Inject('SIGN_UP_MODEL') private signUpModel: Model<signUp>) {}
 
   async signUp(signUpDto: signUpDto): Promise<signUp> {
     const hash = await argon.hash(signUpDto.password)
 
-    const createdCat = this.signUpModel.create(signUpDto);
-    return createdCat;
-  }
+    const newUser = {
+      ...signUpDto,
+      password: hash,
+    };
+    let createdUser = await this.signUpModel.create(newUser);
 
+    return createdUser;
+  }
 }
