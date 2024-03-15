@@ -6,7 +6,7 @@ import { User } from "../../../models/user/schemas/user.schema";
 import { compare } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 @Injectable()
-export class SignInService {
+export class Sign_inService {
   constructor(@InjectModel('user') private readonly userModel: Model<User>) {}
   async signIn(createSignInDto: CreateSignInDto): Promise<any> {
     const user = await this.userModel.findOne({ email: createSignInDto.email }).select('+password');

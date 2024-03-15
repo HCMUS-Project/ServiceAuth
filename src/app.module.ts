@@ -13,7 +13,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './core/responses/interceptors/response.interceptor';
 import { DatabaseModule } from './core/database/modules/database.module';
 import {SignUpModule} from './feature/auth/sign_up/sign_up.module';
-import {SignInModule} from "./feature/auth/sign-in/sign-in.module";
+import {Sign_inModule} from "./feature/auth/sign_in/sign_in.module";
 
 @Module({
     imports: [LoggerModule, ConfigsModule, ContextModule, DatabaseModule, SignUpModule, SignUpModule],

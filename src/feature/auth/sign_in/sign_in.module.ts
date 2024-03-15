@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { SignInService } from './sign-in.service';
-import { SignInController } from './sign-in.controller';
+import { Sign_inService } from './sign_in.service';
+import { Sign_inController } from './sign_in.controller';
 import {UserSchema} from "../../../models/user/schemas/user.schema";
 // @ts-ignore
 import {MongooseModule} from "@nestjs/mongoose";
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: "user", schema: UserSchema }])],
-  controllers: [SignInController],
-  providers: [SignInService],
+  controllers: [Sign_inController],
+  providers: [Sign_inService],
 })
-export class SignInModule {}
+export class Sign_inModule {}
