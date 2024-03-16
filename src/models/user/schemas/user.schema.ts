@@ -3,7 +3,7 @@ import {User as UserInterface} from "../interfaces/user.interface";
 
 export const UserSchema = new mongoose.Schema<UserInterface>(
     {
-        username: {
+        email: {
             type: String,
             required: true,
             unique: true,
