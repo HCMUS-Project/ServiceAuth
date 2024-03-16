@@ -1,5 +1,7 @@
-import * as mongoose from "mongoose"
-export const UserSchema = new mongoose.Schema(
+import * as mongoose from "mongoose";
+import {User as UserInterface} from "../interfaces/user.interface";
+
+export const UserSchema = new mongoose.Schema<UserInterface>(
     {
         username: {
             type: String,
@@ -10,12 +12,14 @@ export const UserSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        is_deleted: {
+            type: Boolean, 
+            default: false
+        },
+        is_active: {
+            type: Boolean, 
+            default: true
+        },
     },
-    { timestamps: true }
-)
-
-export interface User extends mongoose.Document {
-    _id: string;
-    username: string;
-    password: string;
-}
+    {timestamps: true}
+);

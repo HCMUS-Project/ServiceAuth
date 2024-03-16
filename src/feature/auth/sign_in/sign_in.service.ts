@@ -1,6 +1,6 @@
 import {  Inject, Injectable } from '@nestjs/common';
 import { signInDto } from './dto/sign_in.dto';
-import { User } from "../../../models/user/schemas/user.schema";
+import { User } from 'src/models/user/interfaces/user.interface';
 import * as argon from 'argon2';
 import { Model } from 'mongoose';
 
