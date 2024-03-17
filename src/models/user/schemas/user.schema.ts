@@ -1,5 +1,5 @@
-import * as mongoose from "mongoose";
-import {User as UserInterface} from "../interfaces/user.interface";
+import * as mongoose from 'mongoose';
+import { User as UserInterface } from '../interfaces/user.interface';
 
 export const UserSchema = new mongoose.Schema<UserInterface>(
     {
@@ -13,13 +13,13 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
             required: true,
         },
         is_deleted: {
-            type: Boolean, 
-            default: false
+            type: Boolean,
+            default: false,
         },
         is_active: {
-            type: Boolean, 
-            default: true
+            type: Boolean,
+            default: true,
         },
     },
-    {timestamps: true}
+    { timestamps: true },
 );

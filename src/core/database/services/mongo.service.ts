@@ -27,7 +27,6 @@ export class MongoService {
                 authSource: 'admin',
                 user: this.user,
                 pass: this.pass,
-                useNewUrlParser: true,
             } as mongoose.ConnectOptions);
 
             this.logger.info('MongoDB connected: ' + mongoUrl);
