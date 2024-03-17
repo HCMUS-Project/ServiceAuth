@@ -7,6 +7,8 @@ import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
 export class MongoService {
     private uri: string;
     private database: string;
+    private user: string;
+    private pass: string;
 
     constructor(
         private configService: ConfigService<ConfigModule>,
@@ -14,12 +16,19 @@ export class MongoService {
     ) {
         this.uri = configService.get<string>('mongoUri');
         this.database = configService.get<string>('mongoDb');
+        this.user = configService.get<string>('mongoUser');
+        this.pass = configService.get<string>('mongoPass');
     }
 
     public async connect(): Promise<typeof mongoose> {
         try {
             const mongoUrl: string = this.uri + '/' + this.database;
-            const connect = await mongoose.connect(mongoUrl);
+            const connect = await mongoose.connect(mongoUrl, {
+                authSource: 'admin',
+                user: this.user,
+                pass: this.pass,
+                useNewUrlParser: true,
+            } as mongoose.ConnectOptions);
 
             this.logger.info('MongoDB connected: ' + mongoUrl);
             return connect;
