@@ -1,10 +1,10 @@
 import { Mongoose } from 'mongoose';
-import {signUpSchema} from './schemas/sign_up.schema';
+import {UserSchema} from 'src/models/user/schemas/user.schema';
 
 export const signUpProviders = [
   {
     provide: 'SIGN_UP_MODEL',
-    useFactory: (mongoose: Mongoose) => mongoose.model('signUp', signUpSchema),
+    useFactory: (mongoose: Mongoose) => mongoose.model('user', UserSchema),
     inject: ['DATABASE_CONNECTION'],
   },
 ];
