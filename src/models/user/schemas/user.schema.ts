@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 import { User as UserInterface } from '../interfaces/user.interface';
+import { v4 as uuidv4 } from 'uuid';
 
 export const UserSchema = new mongoose.Schema<UserInterface>(
     {
@@ -11,6 +12,11 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
         password: {
             type: String,
             required: true,
+        },
+        id: {
+            type: String,
+            default: () => uuidv4(),
+            unique: true,
         },
         is_deleted: {
             type: Boolean,

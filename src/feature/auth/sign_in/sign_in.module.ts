@@ -7,9 +7,10 @@ import { UserSchema } from '../../../models/user/schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { signInProviders } from './sign_in.provider';
 import {JwtModule} from "@nestjs/jwt";
+import { LoggerModule } from 'src/core/logger/modules/logger.module';
 
 @Module({
-    imports: [DatabaseModule, JwtModule.register({})],
+    imports: [DatabaseModule, JwtModule.register({}), LoggerModule],
     controllers: [SignInController],
     providers: [SignInService, ...signInProviders],
 })

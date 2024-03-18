@@ -1,14 +1,18 @@
-import { ForbiddenException, Inject, Injectable, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 import { signUpDto } from './dto/sign_up.dto';
-import { ConfigService } from '@nestjs/config';
 import * as argon from 'argon2';
 import { Model } from 'mongoose';
 import { User } from 'src/models/user/interfaces/user.interface';
 import { validateOrReject, ValidationError } from 'class-validator';
+import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
+import { ForbiddenException } from 'src/common/exceptions/exceptions';
 
 @Injectable()
 export class SignUpService {
-    constructor(@Inject('SIGN_UP_MODEL') private readonly User: Model<User>) {}
+    constructor(
+        @Inject('SIGN_UP_MODEL') private readonly User: Model<User>,
+        @Inject(LoggerKey) private logger: Logger,
+    ) {}
 
     async signUp(_signUpDto: signUpDto): Promise<User> {
         try {
@@ -24,20 +28,26 @@ export class SignUpService {
         try {
             const hashedPassword = await argon.hash(_signUpDto.password);
 
+            // Check if user already exists
+            if (await this.User.findOne({ email: _signUpDto.email })) {
+                this.logger.error("User already exists. Can't sign up!");
+                throw new ForbiddenException(
+                    "User already exists. Can't sign up!",
+                    'User already exists',
+                );
+            }
+
+            // Save user to database
             const newUser = new this.User({
                 email: _signUpDto.email,
                 password: hashedPassword,
             });
 
-            return await newUser.save();
+            const user = await newUser.save();
+            return user;
         } catch (error) {
-            if (error instanceof ForbiddenException) {
-                console.error("User already exists. Can't sign up!", error);
-                throw error;
-            }
-
-            console.error('An error occurred:', error);
-            throw error;
+            this.logger.error('Error while signing up user', { error });
+            return error;
         }
     }
 }

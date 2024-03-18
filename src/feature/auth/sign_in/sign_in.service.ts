@@ -7,12 +7,18 @@ import { validateOrReject, ValidationError } from 'class-validator';
 import { UserNotFoundException, InvalidPasswordException, ValidationFailedException } from '../../../common/exceptions/exceptions';
 import {JwtModule, JwtService} from "@nestjs/jwt";
 import * as uuid from 'uuid';
+import {
+    UserNotFoundException,
+    InvalidPasswordException,
+    ValidationFailedException,
+} from '../../../common/exceptions/exceptions';
+import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
 
 @Injectable()
 export class SignInService {
     constructor(
         @Inject('USER_MODEL') private readonly User: Model<User>,
-        private readonly jwtService: JwtService // Inject JwtService directly
+        @Inject(LoggerKey) private logger: Logger,
     ) {}
 
     async signIn(_signInDto: signInDto): Promise<any> {
