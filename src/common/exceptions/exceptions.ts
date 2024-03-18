@@ -4,9 +4,10 @@
  */
 
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 
 export class BadRequestException extends HttpException {
-    constructor(message: string) {
+    constructor(message: string, error: string) {
         super(message, HttpStatus.BAD_REQUEST);
     }
 }
@@ -14,5 +15,23 @@ export class BadRequestException extends HttpException {
 export class NotFoundException extends HttpException {
     constructor(message: string) {
         super(message, HttpStatus.NOT_FOUND);
+    }
+}
+
+export class UserNotFoundException extends UnauthorizedException {
+    constructor(message = 'User not found', error?: string) {
+        super(message, error);
+    }
+}
+
+export class InvalidPasswordException extends UnauthorizedException {
+    constructor(message = 'Invalid password', error?: string) {
+        super(message, error);
+    }
+}
+
+export class ValidationFailedException extends BadRequestException {
+    constructor(message = 'Validation failed', error?: string) {
+        super(message, error);
     }
 }

@@ -1,9 +1,10 @@
-import { UnauthorizedException, Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { signInDto } from './dto/sign_in.dto';
 import { User } from 'src/models/user/interfaces/user.interface';
 import * as argon from 'argon2';
 import { Model } from 'mongoose';
 import { validateOrReject, ValidationError } from 'class-validator';
+import { UserNotFoundException, InvalidPasswordException, ValidationFailedException } from '../../../common/exceptions/exceptions';
 
 @Injectable()
 export class SignInService {
@@ -16,20 +17,22 @@ export class SignInService {
         } catch (errors) {
             if (errors instanceof Array && errors[0] instanceof ValidationError) {
                 const messages = errors.map(error => Object.values(error.constraints)).join(', ');
-                throw new BadRequestException(`Validation failed: ${messages}`);
+                throw new ValidationFailedException(`Validation failed: ${messages}`);
+            } else {
+                throw new ValidationFailedException('Validation failed', errors.toString());
             }
         }
 
         const user = await this.User.findOne({ email: _signInDto.email }).select('+password');
 
         if (!user) {
-            throw new UnauthorizedException('User not found');
+            throw new UserNotFoundException('User not found for email: ' + _signInDto.email);
         }
 
         const isPasswordMatch = await argon.verify(user.password, _signInDto.password);
 
         if (!isPasswordMatch) {
-            throw new UnauthorizedException('Invalid password');
+            throw new InvalidPasswordException('Invalid password for user: ' + user.email);
         }
 
         return { message: 'Login successful' };
