@@ -6,9 +6,10 @@ import { UserSchema } from '../../../models/user/schemas/user.schema';
 // @ts-ignore
 import { MongooseModule } from '@nestjs/mongoose';
 import { signInProviders } from './sign_in.provider';
+import {JwtModule} from "@nestjs/jwt";
 
 @Module({
-    imports: [DatabaseModule],
+    imports: [DatabaseModule, JwtModule.register({})],
     controllers: [SignInController],
     providers: [SignInService, ...signInProviders],
 })

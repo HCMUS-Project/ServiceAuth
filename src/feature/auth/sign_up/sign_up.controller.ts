@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { SignUpService } from './sign_up.service';
 import { signUpDto } from './dto/sign_up.dto';
 
-@Controller('auth')
+@Controller('api/auth')
 export class SignUpController {
     constructor(private signUpService: SignUpService) {}
 

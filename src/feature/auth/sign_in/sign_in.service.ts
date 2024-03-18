@@ -5,10 +5,15 @@ import * as argon from 'argon2';
 import { Model } from 'mongoose';
 import { validateOrReject, ValidationError } from 'class-validator';
 import { UserNotFoundException, InvalidPasswordException, ValidationFailedException } from '../../../common/exceptions/exceptions';
+import {JwtModule, JwtService} from "@nestjs/jwt";
+import * as uuid from 'uuid';
 
 @Injectable()
 export class SignInService {
-    constructor(@Inject('USER_MODEL') private readonly User: Model<User>) {}
+    constructor(
+        @Inject('USER_MODEL') private readonly User: Model<User>,
+        private readonly jwtService: JwtService // Inject JwtService directly
+    ) {}
 
     async signIn(_signInDto: signInDto): Promise<any> {
         try {
@@ -34,7 +39,16 @@ export class SignInService {
         if (!isPasswordMatch) {
             throw new InvalidPasswordException('Invalid password for user: ' + user.email);
         }
+        const signToken = this.signToken(user.id, user.email);
+        return { message: 'Login successful',access_token: signToken };
+    }
 
-        return { message: 'Login successful' };
+    signToken(id: string, email: string) {
+        const payload = { id, email };
+        const jwtSecret = process.env.JWT_SECRET || uuid.v4();
+        return this.jwtService.sign(payload,{
+            expiresIn: '180m',
+            secret: jwtSecret
+        });
     }
 }
