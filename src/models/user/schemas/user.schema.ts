@@ -13,7 +13,7 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
             type: String,
             required: true,
         },
-        id: {
+        user_id: {
             type: String,
             default: () => uuidv4(),
             unique: true,

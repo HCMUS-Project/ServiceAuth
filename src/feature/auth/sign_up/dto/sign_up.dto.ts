@@ -7,5 +7,9 @@ export class signUpDto {
 
     @IsString()
     @IsNotEmpty()
+    readonly device: string;
+
+    @IsString()
+    @IsNotEmpty()
     readonly password: string;
 }
