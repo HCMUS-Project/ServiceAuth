@@ -13,6 +13,8 @@ import { ResponseInterceptor } from './core/responses/interceptors/response.inte
 import { DatabaseModule } from './core/database/modules/database.module';
 import { SignUpModule } from './feature/auth/sign_up/sign_up.module';
 import { SignInModule } from './feature/auth/sign_in/sign_in.module';
+import { TokenModule } from './feature/auth/token/token.module';
+import { UsersModule } from './feature/auth/users/users.module';
 import { CacheModule } from './core/cache/modules/cache.module';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
@@ -24,6 +26,8 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
         DatabaseModule,
         SignUpModule,
         SignInModule,
+        TokenModule,
+        UsersModule,
         // CacheModule.registerAsync(RedisOptions)
     ],
     controllers: [AppController],

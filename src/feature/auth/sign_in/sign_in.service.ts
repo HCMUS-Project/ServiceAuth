@@ -10,12 +10,14 @@ import {
     ValidationFailedException,
 } from '../../../common/exceptions/exceptions';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
+import { TokenService } from '../token/token.service';
 
 @Injectable()
 export class SignInService {
     constructor(
         @Inject('USER_MODEL') private readonly User: Model<User>,
         @Inject(LoggerKey) private logger: Logger,
+        private readonly tokenService: TokenService,
     ) {}
 
     async signIn(_signInDto: signInDto): Promise<any> {
@@ -37,6 +39,7 @@ export class SignInService {
         const user = await this.User.findOne({ email: _signInDto.email }).select('+password');
 
         if (!user) {
+            this.logger.error('User not found for email: ' + _signInDto.email);
             throw new UserNotFoundException('User not found for email: ' + _signInDto.email);
         }
 
@@ -44,9 +47,18 @@ export class SignInService {
 
         // Ch
         if (!isPasswordMatch) {
+            this.logger.error('Invalid password for user: ' + user.email);
             throw new InvalidPasswordException('Invalid password for user: ' + user.email);
         }
 
-        return { message: 'Login successful' };
+        const tokens = await this.tokenService.getTokens(user.user_id, _signInDto.device);
+        await this.tokenService.updateRefreshToken(user.user_id, tokens.refreshToken);
+
+        return { user, tokens };
+        // return {message: 'Login successful'};
+    }
+
+    async signOut(userId: string) {
+        this.tokenService.updateRefreshTokenbyValue(userId, null);
     }
 }
