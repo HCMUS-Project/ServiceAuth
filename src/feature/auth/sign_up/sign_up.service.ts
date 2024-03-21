@@ -15,11 +15,10 @@ export class SignUpService
     constructor (
         @Inject('SIGN_UP_MODEL') private readonly User: Model<User>,
         @Inject(LoggerKey) private logger: Logger,
-        private readonly tokenService: TokenService,
-        private readonly userService: UsersService,
+        private readonly tokenService: TokenService
     ) { }
 
-    async signUp (_signUpDto: signUpDto): Promise<User>
+    async signUp (_signUpDto: signUpDto): Promise<any>
     {
         try
         {
@@ -58,13 +57,13 @@ export class SignUpService
             const user = await newUser.save();
 
             // Generate and update tokens
-            const tokens = await this.tokenService.getTokens(user.id, _signUpDto.device);
+            const tokens = await this.tokenService.getTokens(user.user_id, _signUpDto.device);
             // const id = 
-            const save_token = await this.tokenService.saveToken(tokens.accessToken, tokens.refreshToken, user._id, 
+            const save_token = await this.tokenService.saveToken(tokens.accessToken, tokens.refreshToken, user.user_id, 
                 _signUpDto.device, tokens.accessTokenExpiresAt, tokens.refreshTokenExpiresAt);
-            await this.tokenService.updateRefreshToken(user._id, tokens.refreshToken);
+            const new_tokens = await this.tokenService.updateRefreshToken(user.user_id, tokens.refreshToken);
 
-            return user;
+            return {user, new_tokens};
         } catch (error)
         {
             this.logger.error('Error while signing up user', {error});

@@ -21,7 +21,7 @@ export class TokenService
   ) { }
 
   async saveToken (accessToken: string, refreshToken: string,
-    userId: mongoose.Types.ObjectId, deviceId: string,
+    userId: string, deviceId: string,
     access_token_expired_at: Date,
     refresh_token_expired_at: Date)
   {
@@ -59,11 +59,18 @@ export class TokenService
     return argon.hash(data);
   }
 
+  async updateRefreshTokenbyValue (userId: string, value:string)
+  {
+    await this.Token
+      .findOneAndUpdate({ user_id: userId }, {refresh_token: value}, {new: true})
+      .exec();
+  }
+
   async updateRefreshToken (userId: string, refreshToken: string)
   {
     const hashedRefreshToken = await this.hashData(refreshToken);
-    await this.Token
-      .findByIdAndUpdate(userId, {refresh_token: hashedRefreshToken}, {new: true})
+    return await this.Token
+      .findOneAndUpdate({ user_id: userId }, {refresh_token: hashedRefreshToken}, {new: true})
       .exec();
   }
 
@@ -87,14 +94,16 @@ export class TokenService
         },
         {
           secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: '1h',
+          expiresIn: '15m',
         },
       ),
     ]);
 
     // Calculate expiration times
     const accessTokenExpiresAt = addMinutes(new Date(), 5);
-    const refreshTokenExpiresAt = addHours(new Date(), 1);
+    // const refreshTokenExpiresAt = addHours(new Date(), 1);
+    const refreshTokenExpiresAt = addMinutes(new Date(), 15);
+
 
     return {
       accessToken,

@@ -4,7 +4,7 @@ import {CreateUserDto} from './dto/create-user.dto';
 import {UpdateUserDto} from './dto/update-user.dto';
 import {AccessTokenGuard} from 'src/common/guards/token/accessToken.guard';
 
-@Controller('users')
+@Controller('api/users')
 export class UsersController
 {
   constructor (private readonly usersService: UsersService) { }
@@ -24,10 +24,10 @@ export class UsersController
   }
 
   // Get user by id 
-  @Get('id/:id')
-  findById (@Param('id') id: string)
+  @Get('user_id/:user_id')
+  findById (@Param('user_id') user_id: string)
   {
-    return this.usersService.findById(id);
+    return this.usersService.findById(user_id);
   }
 
   // Get email by email (test successfully)
