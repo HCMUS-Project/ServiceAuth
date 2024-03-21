@@ -20,8 +20,11 @@ export class SignInService {
 
     async signIn(_signInDto: signInDto): Promise<any> {
         try {
+            // Validate sign in data
             const signInData = Object.assign(new signInDto(), _signInDto);
             await validateOrReject(signInData);
+
+            // Check if user exists
         } catch (errors) {
             if (errors instanceof Array && errors[0] instanceof ValidationError) {
                 const messages = errors.map(error => Object.values(error.constraints)).join(', ');
@@ -39,6 +42,7 @@ export class SignInService {
 
         const isPasswordMatch = await argon.verify(user.password, _signInDto.password);
 
+        // Ch
         if (!isPasswordMatch) {
             throw new InvalidPasswordException('Invalid password for user: ' + user.email);
         }
