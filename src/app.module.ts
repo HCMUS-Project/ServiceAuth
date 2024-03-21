@@ -14,8 +14,8 @@ import { ResponseInterceptor } from './core/responses/interceptors/response.inte
 import { DatabaseModule } from './core/database/modules/database.module';
 import { SignUpModule } from './feature/auth/sign_up/sign_up.module';
 import { SignInModule } from './feature/auth/sign_in/sign_in.module';
-import {TokenModule} from './feature/auth/token/token.module';
-import {UsersModule} from './feature/auth/users/users.module';
+import { TokenModule } from './feature/auth/token/token.module';
+import { UsersModule } from './feature/auth/users/users.module';
 
 @Module({
     imports: [
@@ -26,7 +26,7 @@ import {UsersModule} from './feature/auth/users/users.module';
         SignUpModule,
         SignInModule,
         TokenModule,
-        UsersModule
+        UsersModule,
     ],
     controllers: [AppController],
     providers: [AppService, { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor }],

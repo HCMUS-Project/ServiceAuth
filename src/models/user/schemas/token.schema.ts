@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import {Token} from '../interfaces/token.interface'; 
+import { Token } from '../interfaces/token.interface';
 
 export const TokenSchema = new mongoose.Schema<Token>(
     {
@@ -25,7 +25,7 @@ export const TokenSchema = new mongoose.Schema<Token>(
             ref: 'users',
             required: true,
         },
-        device_id:{
+        device_id: {
             type: String,
             required: true,
         },
