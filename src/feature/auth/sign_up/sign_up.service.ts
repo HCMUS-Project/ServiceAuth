@@ -32,12 +32,23 @@ export class SignUpService {
             const hashedPassword = await argon.hash(_signUpDto.password);
 
             // Check if user already exists
-            if (await this.User.findOne({ email: _signUpDto.email })) {
-                this.logger.error("User already exists. Can't sign up!");
-                throw new ForbiddenException(
-                    "User already exists. Can't sign up!",
-                    'User already exists',
-                );
+            const checkuser = await this.User.findOne({ email: _signUpDto.email });
+            if (checkuser) {
+                if (checkuser.is_active === true) {
+                    this.logger.error("User already exists. Can't sign up!");
+                    throw new ForbiddenException(
+                        "User already exists. Can't sign up!",
+                        'User already exists',
+                    );
+                }
+
+                else {
+                    this.logger.error("User already exists. Can't sign up!");
+                    throw new ForbiddenException(
+                        "User already exists but not active. Activating user with OTP",
+                        'User already exists',
+                    );
+                }
             }
 
             // Save user to database

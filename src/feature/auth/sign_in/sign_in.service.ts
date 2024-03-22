@@ -8,6 +8,7 @@ import {
     UserNotFoundException,
     InvalidPasswordException,
     ValidationFailedException,
+    UnActivatedUserException,
 } from '../../../common/exceptions/exceptions';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
 import { TokenService } from '../token/token.service';
@@ -42,10 +43,13 @@ export class SignInService {
             this.logger.error('User not found for email: ' + _signInDto.email);
             throw new UserNotFoundException('User not found for email: ' + _signInDto.email);
         }
+        if (user.is_active === false) {
+            this.logger.error('User is not active: ' + _signInDto.email);
+            throw new UnActivatedUserException('User is not active: ' + _signInDto.email);
+        }
 
         const isPasswordMatch = await argon.verify(user.password, _signInDto.password);
 
-        // Ch
         if (!isPasswordMatch) {
             this.logger.error('Invalid password for user: ' + user.email);
             throw new InvalidPasswordException('Invalid password for user: ' + user.email);
@@ -55,7 +59,6 @@ export class SignInService {
         await this.tokenService.updateRefreshToken(user.user_id, tokens.refreshToken);
 
         return { user, tokens };
-        // return {message: 'Login successful'};
     }
 
     async signOut(userId: string) {

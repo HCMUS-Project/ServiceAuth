@@ -6,11 +6,12 @@ import { UserSchema } from '../../../models/user/schemas/user.schema';
 // @ts-ignore
 import { MongooseModule } from '@nestjs/mongoose';
 import { signInProviders } from './sign_in.provider';
-import {JwtModule} from "@nestjs/jwt";
 import { LoggerModule } from 'src/core/logger/modules/logger.module';
+import { TokenModule } from '../token/token.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-    imports: [DatabaseModule, JwtModule.register({}), LoggerModule],
+    imports: [DatabaseModule, LoggerModule, TokenModule, UsersModule],
     controllers: [SignInController],
     providers: [SignInService, ...signInProviders],
 })
