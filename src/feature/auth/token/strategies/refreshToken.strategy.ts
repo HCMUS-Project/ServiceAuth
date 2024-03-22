@@ -1,11 +1,12 @@
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Request } from 'express';
-import { Injectable } from '@nestjs/common';
+import {PassportStrategy} from '@nestjs/passport';
+import {ExtractJwt, Strategy} from 'passport-jwt';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
+import {Request} from 'express';
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
-    constructor() {
+    constructor ()
+    {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: process.env.JWT_REFRESH_SECRET,
@@ -13,8 +14,18 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refres
         });
     }
 
-    validate(req: Request, payload: any) {
-        const refreshToken = req.get('Authorization').replace('Bearer', '').trim();
-        return { ...payload, refreshToken };
+    validate (req: Request, payload: any)
+    {
+        const authHeader = req.headers.authorization;
+        if (!authHeader)
+        {
+            throw new UnauthorizedException('Authorization header is missing');
+        }
+        if (!authHeader.startsWith('Bearer '))
+        {
+            throw new UnauthorizedException('Invalid Authorization header format');
+        }
+        const refreshToken = authHeader.replace('Bearer ', '').trim();
+        return {...payload, refreshToken};
     }
 }
