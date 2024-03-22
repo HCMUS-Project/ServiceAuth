@@ -55,7 +55,7 @@ export class TokenService
         if (!refreshTokenMatches)
             throw new InvalidPasswordException('Refresh token does not match');
         const tokens = await this.getTokens(token.user_id.toString(), token.device_id);
-        await this.updateRefreshToken(token.user_id.toString(), tokens.refreshToken);
+        await this.updateRefreshToken(token.user_id.toString(), tokens.refreshToken, true);
         return tokens;
     } catch (error)
     {
@@ -161,7 +161,6 @@ export class TokenService
     {
         try
         {
-            console.log(req);
             const userId = req.user['user_id'];
             const refreshToken = req.user['refreshToken'];
             return this.refreshTokens(userId, refreshToken);
