@@ -4,10 +4,11 @@
 
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
+import { ServiceConfig } from 'src/configs/service/service.config';
 
 import appConfig from 'src/configs/app/app.config';
 import mongoConfig from './database/mongo/mongo.config';
-import { ServiceConfig } from 'src/configs/service/service.config';
+import cacheConfig from './cache/cache.config';
 
 @Global()
 @Module({
@@ -15,7 +16,7 @@ import { ServiceConfig } from 'src/configs/service/service.config';
         NestConfigModule.forRoot({
             envFilePath: ['.env'],
             isGlobal: true,
-            load: [appConfig, mongoConfig],
+            load: [appConfig, mongoConfig, cacheConfig],
         }),
     ],
     controllers: [],

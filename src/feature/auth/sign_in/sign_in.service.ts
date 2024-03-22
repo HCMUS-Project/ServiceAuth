@@ -4,29 +4,29 @@ import { User } from 'src/models/user/interfaces/user.interface';
 import * as argon from 'argon2';
 import { Model } from 'mongoose';
 import { validateOrReject, ValidationError } from 'class-validator';
-import {JwtModule, JwtService} from "@nestjs/jwt";
-import * as uuid from 'uuid';
 import {
     UserNotFoundException,
     InvalidPasswordException,
     ValidationFailedException,
-}
-from '../../../common/exceptions/exceptions';
+} from '../../../common/exceptions/exceptions';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
+import { TokenService } from '../token/token.service';
 
 @Injectable()
 export class SignInService {
-
     constructor(
         @Inject('USER_MODEL') private readonly User: Model<User>,
         @Inject(LoggerKey) private logger: Logger,
-        private jwtService: JwtService
+        private readonly tokenService: TokenService,
     ) {}
 
     async signIn(_signInDto: signInDto): Promise<any> {
         try {
+            // Validate sign in data
             const signInData = Object.assign(new signInDto(), _signInDto);
             await validateOrReject(signInData);
+
+            // Check if user exists
         } catch (errors) {
             if (errors instanceof Array && errors[0] instanceof ValidationError) {
                 const messages = errors.map(error => Object.values(error.constraints)).join(', ');
@@ -36,32 +36,29 @@ export class SignInService {
             }
         }
 
-        try{
-            const user = await this.User.findOne({ email: _signInDto.email }).select('+password');
+        const user = await this.User.findOne({ email: _signInDto.email }).select('+password');
 
-            if (!user) {
-                throw new UserNotFoundException('User not found for email: ' + _signInDto.email);
-            }
-
-            const isPasswordMatch = await argon.verify(user.password, _signInDto.password);
-
-            if (!isPasswordMatch) {
-                throw new InvalidPasswordException('Invalid password for user: ' + user.email);
-            }
-            const signToken = this.signToken(user.id, user.email);
-            return { message: 'Login successful',access_token: signToken };
-        } catch (error) {
-            this.logger.error('Error while signing in user', { error });
-            return error;
+        if (!user) {
+            this.logger.error('User not found for email: ' + _signInDto.email);
+            throw new UserNotFoundException('User not found for email: ' + _signInDto.email);
         }
+
+        const isPasswordMatch = await argon.verify(user.password, _signInDto.password);
+
+        // Ch
+        if (!isPasswordMatch) {
+            this.logger.error('Invalid password for user: ' + user.email);
+            throw new InvalidPasswordException('Invalid password for user: ' + user.email);
+        }
+
+        const tokens = await this.tokenService.getTokens(user.user_id, _signInDto.device);
+        await this.tokenService.updateRefreshToken(user.user_id, tokens.refreshToken);
+
+        return { user, tokens };
+        // return {message: 'Login successful'};
     }
 
-    signToken(id: string, email: string) {
-        const payload = { id, email };
-        const jwtSecret = process.env.JWT_SECRET || uuid.v4();
-        return this.jwtService.sign(payload,{
-            expiresIn: '180m',
-            secret: jwtSecret
-        });
+    async signOut(userId: string) {
+        this.tokenService.updateRefreshTokenbyValue(userId, null);
     }
 }
