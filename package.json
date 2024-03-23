@@ -1,6 +1,9 @@
 {
     "name": "nest_template",
     "version": "0.0.1",
+    "nest": {
+        "timezone": "Asia/Ho_Chi_Minh"
+      },
     "description": "",
     "author": "",
     "private": true,
@@ -20,6 +23,7 @@
         "test:e2e": "jest --config ./test/jest-e2e.json"
     },
     "dependencies": {
+        "@fastify/static": "^7.0.1",
         "@fsouza/prettierd": "^0.25.2",
         "@nestjs-modules/mailer": "^1.11.2",
         "@nestjs/cache-manager": "^2.2.1",
@@ -32,6 +36,7 @@
         "@nestjs/passport": "^10.0.3",
         "@nestjs/platform-express": "^10.0.0",
         "@nestjs/platform-fastify": "^10.3.3",
+        "@nestjs/swagger": "^7.3.0",
         "@types/cache-manager": "^4.0.6",
         "@types/cache-manager-redis-store": "^2.0.4",
         "argon2": "^0.40.1",
