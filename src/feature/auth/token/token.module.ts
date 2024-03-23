@@ -10,7 +10,9 @@ import { LoggerModule } from 'src/core/logger/modules/logger.module';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-    imports: [JwtModule.register({}), DatabaseModule, LoggerModule, UsersModule],
+    imports: [JwtModule.register({
+        secret: process.env.JWT_SECRET,
+    }), DatabaseModule, LoggerModule, UsersModule],
     controllers: [TokenController],
     providers: [TokenService, AccessTokenStrategy, RefreshTokenStrategy, ...TokenProviders],
     exports: [TokenService],

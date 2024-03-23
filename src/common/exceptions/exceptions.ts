@@ -41,3 +41,9 @@ export class ForbiddenException extends HttpException {
         super(message, HttpStatus.FORBIDDEN);
     }
 }
+
+export class UnActivatedUserException extends UnauthorizedException {
+    constructor(message = 'Unactive account', error?: string) {
+        super(message, error);
+    }
+}
