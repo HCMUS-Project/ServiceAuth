@@ -10,6 +10,7 @@ import
     InvalidPasswordException,
     ValidationFailedException,
     UnActivatedUserException,
+    BadRequestException,
 } from '../../../common/exceptions/exceptions';
 import Logger, {LoggerKey} from 'src/core/logger/interfaces/logger.interface';
 import {TokenService} from '../token/token.service';
