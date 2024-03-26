@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "nest": {
         "timezone": "Asia/Ho_Chi_Minh"
-      },
+    },
     "description": "",
     "author": "",
     "private": true,

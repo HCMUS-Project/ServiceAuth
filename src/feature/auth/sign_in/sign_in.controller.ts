@@ -20,9 +20,9 @@ export class SignInController
     constructor (private readonly signInService: SignInService) { }
 
     @Post('sign-in')
-    async signIn (@Body() signInDto: signInDto)
+    async signIn (@Body() signInDto: signInDto, @Request() req)
     {
-        return await this.signInService.signIn(signInDto);
+        return await this.signInService.signIn(signInDto, req);
     }
 
     @UseGuards(AccessTokenGuard)
