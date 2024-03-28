@@ -31,4 +31,11 @@ export class SignInController
     {
         return await this.signInService.signOut(req);
     }
+
+    @UseGuards(AccessTokenGuard)
+    @Post('change-password')
+    async changePassword (@Request() req, @Body() changePasswordDto)
+    {
+        return await this.signInService.changePassword(req, changePasswordDto);
+    }
 }

@@ -8,7 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { signInProviders } from './sign_in.provider';
 import { LoggerModule } from 'src/core/logger/modules/logger.module';
 import { TokenModule } from '../token/token.module';
-import { UsersModule } from '../users/users.module';
+import { UsersModule } from '../../user/users/users.module';
 
 @Module({
     imports: [DatabaseModule, LoggerModule, TokenModule, UsersModule],

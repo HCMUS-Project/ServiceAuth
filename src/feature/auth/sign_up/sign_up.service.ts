@@ -7,7 +7,7 @@ import {validateOrReject, ValidationError} from 'class-validator';
 import Logger, {LoggerKey} from 'src/core/logger/interfaces/logger.interface';
 import {ForbiddenException} from 'src/common/exceptions/exceptions';
 import {TokenService} from '../token/token.service';
-import {UsersService} from '../users/users.service';
+import {UsersService} from '../../user/users/users.service';
 
 @Injectable()
 export class SignUpService

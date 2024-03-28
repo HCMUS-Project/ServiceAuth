@@ -1,7 +1,6 @@
 import {Inject, Injectable} from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { otpDto } from "./dto/otp.dto";
-import * as generatePassword from 'generate-password';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CacheStore } from '@nestjs/cache-manager';
 import {Model} from "mongoose";
@@ -22,17 +21,20 @@ export class OtpService {
     ) {
     }
 
+    generateOTP() {
+        const min = 100000;
+        const max = 999999;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
     async sendOtpEmail(otpDto: otpDto): Promise<void> {
         try {
             if (!otpDto.email) {
                 throw new Error('Email is not provided.');
             }
-            const generate_otp = generatePassword.generate({
-                length: 6,
-                numbers: true,
-            });
+            const generate_otp = this.generateOTP();
 
-            await this.cacheManager.set(`otp_${otpDto.email}`, `${generate_otp}`, {ttl: 300});
+            await this.cacheManager.set(`otp_${otpDto.email}`, `${generate_otp}`, {ttl: 600});
 
             const response = await this.mailerService.sendMail({
                 to: otpDto.email,
@@ -45,9 +47,15 @@ export class OtpService {
         }
     }
 
-    async activeAccount(otpDto: otpDto): Promise<boolean> {
+    async checkOtpValid(otpDto: otpDto): Promise<boolean> {
         const savedOtp = await this.cacheManager.get(`otp_${otpDto.email}`);
         const isOtpValid = savedOtp === otpDto.otp;
+        return isOtpValid;
+    }
+
+    async activeAccount(otpDto: otpDto): Promise<boolean> {
+        const isOtpValid = this.checkOtpValid(otpDto)
+
         let isAccountActive = false;
         if (isOtpValid) {
             const user = await this.User.findOne({email: otpDto.email}).select('+password');
@@ -64,8 +72,7 @@ export class OtpService {
     }
 
     async recoverPassword(otpDto: otpDto, new_password: string): Promise<boolean> {
-        const savedOtp = await this.cacheManager.get(`otp_${otpDto.email}`);
-        const isOtpValid = savedOtp === otpDto.otp;
+        const isOtpValid = this.checkOtpValid(otpDto)
         let isPasswordChange = false;
         if (isOtpValid) {
             const user = await this.User.findOne({email: otpDto.email}).select('+password');
