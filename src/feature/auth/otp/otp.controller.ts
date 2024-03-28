@@ -12,8 +12,18 @@ export class OtpController {
         return await this.otpService.sendOtpEmail(otpDto);
     }
 
-    @Post('check-otp')
-    async checkOtp(@Body() otpDto: otpDto): Promise<boolean> {
+    @Post('active-account')
+    async activeAccount(@Body() otpDto: otpDto): Promise<boolean> {
         return await this.otpService.activeAccount(otpDto);
+    }
+
+    @Post('check-otp-valid')
+    async checkOtpValid(@Body() otpDto: otpDto): Promise<boolean> {
+        return await this.otpService.checkOtpValid(otpDto);
+    }
+
+    @Post('recover-password')
+    async recoverPassword(@Body() otpDto: otpDto, new_password: string): Promise<boolean> {
+        return await this.otpService.recoverPassword(otpDto, new_password);
     }
 }
