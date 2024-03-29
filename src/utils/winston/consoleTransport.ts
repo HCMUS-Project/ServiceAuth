@@ -13,10 +13,11 @@ export default class ConsoleTransport {
                 winston.format.printf(log => {
                     const color = this.mapLogLevelColor(log.level as LogLevel);
                     const prefix = `${log.data.label ? `[${log.data.label}]` : ''}`;
-                    return `${this.colorize(color, prefix + '  -')} ${log.timestamp}    ${
-                        log.data.correlationId
-                            ? `(${this.colorize(LogColors.cyan, log.data.correlationId)})`
-                            : ''
+                    return `${this.colorize(color, prefix + '  -')} ${log.timestamp} ${
+                        // log.data.correlationId
+                        //     ? `(${this.colorize(LogColors.cyan, log.data.correlationId)})`
+                        //     : ''
+                        ''
                     } ${this.colorize(color, log.level.toUpperCase())} ${
                         log.data.sourceClass
                             ? `${this.colorize(LogColors.cyan, `[${log.data.sourceClass}]`)}`

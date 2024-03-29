@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "nest": {
         "timezone": "Asia/Ho_Chi_Minh"
-      },
+    },
     "description": "",
     "author": "",
     "private": true,
@@ -25,7 +25,7 @@
     "dependencies": {
         "@fastify/static": "^7.0.1",
         "@fsouza/prettierd": "^0.25.2",
-        "@nestjs-modules/mailer": "^1.11.2",
+        "@nestjs-modules/mailer": "1.10.3",
         "@nestjs/cache-manager": "^2.2.1",
         "@nestjs/common": "^10.0.0",
         "@nestjs/config": "^3.2.0",

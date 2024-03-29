@@ -5,18 +5,26 @@ export class ExceptionsFilter implements ExceptionFilter {
     catch(exception: unknown, host: ArgumentsHost): void {
         const ctx = host.switchToHttp();
 
-        const httpStatus =
+        const status =
             exception instanceof HttpException
                 ? exception.getStatus()
                 : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        const responseBody = {
-            statusCode: httpStatus,
+        console.log(exception);
+        const errorResponse = {
+            statusCode: status,
+            message:
+                exception instanceof HttpException
+                    ? (exception.getResponse() as { message: string }).message
+                    : 'Internal Server Error',
+            error:
+                exception instanceof HttpException
+                    ? (exception.getResponse() as { error: string }).error
+                    : 'Internal Server Error',
             timestamp: new Date().toISOString(),
-            path: ctx.getRequest().url,
-            errorMessage: (exception as HttpException).message,
+            data: {},
         };
 
-        ctx.getResponse().status(httpStatus).send(responseBody);
+        ctx.getResponse().status(status).send(errorResponse);
     }
 }

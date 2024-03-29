@@ -1,16 +1,13 @@
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { otpDto } from "./dto/otp.dto";
+import { OtpDto } from './dto/otp.dto';
 import * as generatePassword from 'generate-password';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CacheStore } from '@nestjs/cache-manager';
-import {Model} from "mongoose";
+import { Model } from 'mongoose';
 import { User } from 'src/models/user/interfaces/user.interface';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
-import {
-    UserNotFoundException,
-} from '../../../common/exceptions/exceptions';
-
+import { UserNotFoundException } from '../../../common/exceptions/exceptions';
 
 @Injectable()
 export class OtpService {
@@ -19,10 +16,9 @@ export class OtpService {
         @Inject(CACHE_MANAGER) private cacheManager: CacheStore,
         @Inject('USER_MODEL') private readonly User: Model<User>,
         @Inject(LoggerKey) private logger: Logger,
-    ) {
-    }
+    ) {}
 
-    async sendOtpEmail(otpDto: otpDto): Promise<void> {
+    async sendOtpEmail(otpDto: OtpDto): Promise<void> {
         try {
             if (!otpDto.email) {
                 throw new Error('Email is not provided.');
@@ -32,7 +28,7 @@ export class OtpService {
                 numbers: true,
             });
 
-            await this.cacheManager.set(`otp_${otpDto.email}`, `${generate_otp}`, {ttl: 300});
+            await this.cacheManager.set(`otp_${otpDto.email}`, `${generate_otp}`, { ttl: 300 });
 
             const response = await this.mailerService.sendMail({
                 to: otpDto.email,
@@ -45,17 +41,20 @@ export class OtpService {
         }
     }
 
-    async activeAccount(otpDto: otpDto): Promise<boolean> {
+    async activeAccount(otpDto: OtpDto): Promise<boolean> {
         const savedOtp = await this.cacheManager.get(`otp_${otpDto.email}`);
         const isOtpValid = savedOtp === otpDto.otp;
         let isAccountActive = false;
         if (isOtpValid) {
-            const user = await this.User.findOne({email: otpDto.email}).select('+password');
+            const user = await this.User.findOne({ email: otpDto.email }).select('+password');
             if (!user) {
                 this.logger.error('User not found for email: ' + otpDto.email);
                 throw new UserNotFoundException('User not found for email: ' + otpDto.email);
             } else {
-                const result = await this.User.updateOne({email: otpDto.email}, {is_active: true});
+                const result = await this.User.updateOne(
+                    { email: otpDto.email },
+                    { is_active: true },
+                );
                 isAccountActive = result.acknowledged;
             }
             await this.cacheManager.del(`otp_${otpDto.email}`);
@@ -63,17 +62,20 @@ export class OtpService {
         return isAccountActive;
     }
 
-    async recoverPassword(otpDto: otpDto, new_password: string): Promise<boolean> {
+    async recoverPassword(otpDto: OtpDto, new_password: string): Promise<boolean> {
         const savedOtp = await this.cacheManager.get(`otp_${otpDto.email}`);
         const isOtpValid = savedOtp === otpDto.otp;
         let isPasswordChange = false;
         if (isOtpValid) {
-            const user = await this.User.findOne({email: otpDto.email}).select('+password');
+            const user = await this.User.findOne({ email: otpDto.email }).select('+password');
             if (!user) {
                 this.logger.error('User not found for email: ' + otpDto.email);
                 throw new UserNotFoundException('User not found for email: ' + otpDto.email);
             } else {
-                const result = await this.User.updateOne({email: otpDto.email}, {password: new_password});
+                const result = await this.User.updateOne(
+                    { email: otpDto.email },
+                    { password: new_password },
+                );
                 isPasswordChange = result.acknowledged;
             }
             await this.cacheManager.del(`otp_${otpDto.email}`);

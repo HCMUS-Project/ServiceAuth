@@ -11,6 +11,8 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
                 return {
                     statusCode: data.status || context.switchToHttp().getResponse().statusCode,
                     message: data.message || '',
+                    error: data.error || '',
+                    timestamp: new Date().toISOString(),
                     data: data,
                 };
             }),

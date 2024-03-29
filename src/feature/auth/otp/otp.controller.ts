@@ -1,19 +1,18 @@
-import {Body, Controller, Post} from "@nestjs/common";
-import { OtpService } from "./otp.service";
-import { otpDto } from "./dto/otp.dto";
+import { Body, Controller, Post } from '@nestjs/common';
+import { OtpService } from './otp.service';
+import { OtpDto } from './dto/otp.dto';
 
 @Controller('/api/auth')
 export class OtpController {
-    constructor(private readonly otpService: OtpService) {
-    }
+    constructor(private readonly otpService: OtpService) {}
 
     @Post('send-otp')
-    async sendOtpEmail(@Body() otpDto: otpDto): Promise<void> {
+    async sendOtpEmail(@Body() otpDto: OtpDto): Promise<void> {
         return await this.otpService.sendOtpEmail(otpDto);
     }
 
     @Post('check-otp')
-    async checkOtp(@Body() otpDto: otpDto): Promise<boolean> {
+    async checkOtp(@Body() otpDto: OtpDto): Promise<boolean> {
         return await this.otpService.activeAccount(otpDto);
     }
 }

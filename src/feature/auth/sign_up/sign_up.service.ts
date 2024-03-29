@@ -1,59 +1,35 @@
-import {Inject, Injectable, BadRequestException} from '@nestjs/common';
-import {signUpDto} from './dto/sign_up.dto';
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { SignUpDto } from './dto/sign_up.dto';
 import * as argon from 'argon2';
-import {Model} from 'mongoose';
-import {User} from 'src/models/user/interfaces/user.interface';
-import {validateOrReject, ValidationError} from 'class-validator';
-import Logger, {LoggerKey} from 'src/core/logger/interfaces/logger.interface';
-import {ForbiddenException} from 'src/common/exceptions/exceptions';
-import {TokenService} from '../token/token.service';
-import {UsersService} from '../users/users.service';
+import { Model } from 'mongoose';
+import { User } from 'src/models/user/interfaces/user.interface';
+import { validateOrReject, ValidationError } from 'class-validator';
+import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
+import { TokenService } from '../token/token.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
-export class SignUpService
-{
-    constructor (
+export class SignUpService {
+    constructor(
         @Inject('SIGN_UP_MODEL') private readonly User: Model<User>,
         @Inject(LoggerKey) private logger: Logger,
         private readonly tokenService: TokenService,
-    ) { }
+    ) {}
 
-    async signUp (_signUpDto: signUpDto): Promise<any>
-    {
-        try
-        {
-            const signUpData = Object.assign(new signUpDto(), _signUpDto);
-            await validateOrReject(signUpData);
-        } catch (errors)
-        {
-            if (errors instanceof Array && errors[0] instanceof ValidationError)
-            {
-                const messages = errors.map(error => Object.values(error.constraints)).join(', ');
-                throw new BadRequestException(`Validation failed: ${ messages }`);
-            }
-        }
-
-        try
-        {
+    async signUp(_signUpDto: SignUpDto): Promise<any> {
+        try {
             const hashedPassword = await argon.hash(_signUpDto.password);
 
-            // Check if user already exists
-            const checkuser = await this.User.findOne({ email: _signUpDto.email });
-            if (checkuser) {
-                if (checkuser.is_active === true) {
-                    this.logger.error("User already exists. Can't sign up!");
+            // Check if user already exists and is active
+            const checkUser = await this.User.findOne({ email: _signUpDto.email });
+            if (checkUser) {
+                if (checkUser.is_active === true) {
                     throw new ForbiddenException(
-                        "User already exists. Can't sign up!",
-                        'User already exists',
+                        'USER_ALREADY_REGISTERED',
+                        'User is already registered. But not activated yet. Please activate your account.',
                     );
-                }
-
-                else {
-                    this.logger.error("User already exists. Can't sign up!");
-                    throw new ForbiddenException(
-                        "User already exists but not active. Activating user with OTP",
-                        'User already exists',
-                    );
+                } else {
+                    throw new ForbiddenException('USER_ALREADY_REGISTERD', 'User already exists');
                 }
             }
 
@@ -81,14 +57,13 @@ export class SignUpService
             const new_tokens = await this.tokenService.updateRefreshToken(
                 user.user_id,
                 tokens.refreshToken,
-                true
+                true,
             );
 
-            return {user, new_tokens};
-        } catch (error)
-        {
-            this.logger.error('Error while signing up user', {error});
-            return error;
+            return { new_tokens };
+        } catch (error) {
+            this.logger.error('Error while signing up user', { error });
+            throw error;
         }
     }
 }
