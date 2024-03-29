@@ -32,10 +32,12 @@ export class UsersController {
         return this.usersService.findByEmail(email);
     }
 
-    // @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessTokenGuard)
     // Delete id by id of object in mongo, must add UseGuards (test successfully)
     @Delete(':id')
     remove(@Param('id') id: string) {
         return this.usersService.remove(id);
     }
+
+
 }

@@ -7,7 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TokenProviders } from './token.providers';
 import { DatabaseModule } from 'src/core/database/modules/database.module';
 import { LoggerModule } from 'src/core/logger/modules/logger.module';
-import { UsersModule } from '../users/users.module';
+import { UsersModule } from '../../user/users/users.module';
 
 @Module({
     imports: [JwtModule.register({

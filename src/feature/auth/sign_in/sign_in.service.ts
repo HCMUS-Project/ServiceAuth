@@ -13,6 +13,7 @@ import {
 } from '../../../common/exceptions/exceptions';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
 import { TokenService } from '../token/token.service';
+import { changePasswordDto } from './dto/change_password';
 
 @Injectable()
 export class SignInService {
@@ -78,6 +79,43 @@ export class SignInService {
         } catch (error) {
             this.logger.error('Error while signing out', { error });
             throw new BadRequestException('Error while signing out', error.toString());
+        }
+    }
+
+    async changePassword(@Request() req, changePasswordDto: changePasswordDto) {
+        try {
+            const user = await this.User.findOne({ email: changePasswordDto.email }).select(
+                '+password',
+            );
+            if (!user) {
+                this.logger.error('User not found for user_id: ' + changePasswordDto.email);
+                throw new UserNotFoundException(
+                    'User not found for user_id: ' + changePasswordDto.email,
+                );
+            }
+
+            const isPasswordMatch = await argon.verify(
+                user.password,
+                changePasswordDto.oldPassword,
+            );
+
+            if (!isPasswordMatch) {
+                this.logger.error('Invalid password for user: ' + user.email);
+                throw new InvalidPasswordException('Invalid password for user: ' + user.email);
+            }
+
+            const hashedPassword = await argon.hash(changePasswordDto.newPassword);
+            const isPasswordChange = (
+                await this.User.updateOne(
+                    { email: changePasswordDto.email },
+                    { password: hashedPassword },
+                )
+            ).acknowledged;
+
+            return isPasswordChange;
+        } catch (error) {
+            this.logger.error('Error while changing password', { error });
+            throw new BadRequestException('Error while changing password', error.toString());
         }
     }
 }
