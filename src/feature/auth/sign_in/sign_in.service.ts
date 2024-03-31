@@ -107,7 +107,7 @@ export class SignInService
 
             if (req)
             {
-                description.status = sign_In ? 'sign_In' : 'sign_Out'; 
+                description.status = sign_In ? 'sign_In' : 'sign_Out';
                 description.app = req.app;
                 description.baseUrl = req.baseUrl;
                 description.body = req.body;
@@ -132,6 +132,8 @@ export class SignInService
                 description.headers = req.headers;
                 description.hosts = req.hosts;
             }
+
+            const user = await this.User.findOne({user_id: userId, });
 
             const backlogEntry = await this.Backlog.create({
                 user_id: userId,
