@@ -1,19 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { LoginSource } from 'src/common/enums/login.enum';
 
 export class SignUpDto {
     @ApiProperty({ description: 'Email of the user', required: true, default: 'hcmus@gmail.com' })
-    @IsEmail({}, { message: 'Invalid email format' })
-    @IsNotEmpty({ message: 'Email must not be empty' })
+    @IsEmail()
+    @IsNotEmpty()
     readonly email: string;
 
-    @ApiProperty({ description: 'Device name', required: true, default: 'iPhone 15' })
-    @IsString()
-    @IsNotEmpty({ message: 'Device must not be empty' })
-    readonly device: string;
+    @ApiProperty({ enum: LoginSource, description: 'Device name', required: true, default: 'USER' })
+    @IsEnum(LoginSource)
+    @IsNotEmpty()
+    readonly loginSource: LoginSource;
 
     @ApiProperty({ description: 'Password', required: true, default: '123456' })
     @IsString()
-    @IsNotEmpty({ message: 'Password must not be empty' })
+    @IsNotEmpty()
     readonly password: string;
 }

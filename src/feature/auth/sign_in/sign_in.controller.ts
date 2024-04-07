@@ -3,7 +3,7 @@ import { SignInService } from './sign_in.service';
 import { SignInDto } from './dto/sign_in.dto';
 import { AccessTokenGuard } from 'src/common/guards/token/accessToken.guard';
 
-@Controller('/api/auth')
+@Controller('')
 export class SignInController {
     constructor(private readonly signInService: SignInService) {}
 
@@ -20,8 +20,7 @@ export class SignInController {
 
     @UseGuards(AccessTokenGuard)
     @Post('change-password')
-    async changePassword (@Request() req, @Body() changePasswordDto)
-    {
+    async changePassword(@Request() req, @Body() changePasswordDto) {
         return await this.signInService.changePassword(req, changePasswordDto);
     }
 }

@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import { User } from 'src/models/user/interfaces/user.interface';
 import { validateOrReject, ValidationError } from 'class-validator';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
-import { ForbiddenException } from 'src/common/exceptions/exceptions';
 import { TokenService } from '../token/token.service';
 import { UsersService } from '../../user/users/users.service';
 
@@ -30,27 +29,27 @@ export class SignUpService {
                         'User is already registered. But not activated yet. Please activate your account.',
                     );
                 } else {
-                    throw new ForbiddenException('USER_ALREADY_REGISTERD', 'User already exists');
+                    throw new ForbiddenException('USER_ALREADY_REGISTER', 'User already exists');
                 }
             }
 
             // Save user to database
             const newUser = new this.User({
                 email: _signUpDto.email,
-                device: _signUpDto.device,
+                device: _signUpDto.loginSource,
                 password: hashedPassword,
             });
 
             const user = await newUser.save();
 
             // Generate, save and update hashed refresh_token
-            const tokens = await this.tokenService.getTokens(user.user_id, _signUpDto.device);
+            const tokens = await this.tokenService.getTokens(user.user_id, _signUpDto.loginSource);
 
-            const save_token = await this.tokenService.saveToken(
+            this.tokenService.saveToken(
                 tokens.accessToken,
                 tokens.refreshToken,
                 user.user_id,
-                _signUpDto.device,
+                _signUpDto.loginSource,
                 tokens.accessTokenExpiresAt,
                 tokens.refreshTokenExpiresAt,
             );

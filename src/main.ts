@@ -1,4 +1,4 @@
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { NestFastifyApplication, FastifyAdapter } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -7,6 +7,7 @@ import NestjsLoggerServiceAdapter from './core/logger/modules/logger.adapter';
 import { ExceptionsFilter } from './core/responses/filter/exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { fastifyHelmet } from '@fastify/helmet';
 
 async function bootstrap() {
     const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
@@ -27,6 +28,11 @@ async function bootstrap() {
     // Config the filter for the exceptions
     app.useGlobalFilters(new ExceptionsFilter());
 
+    // Register helmet
+    await app.register(fastifyHelmet, {
+        contentSecurityPolicy: false,
+    });
+
     //Get the value from the environment variables
     const configService = app.get(ConfigService<ConfigsModule>);
     const port = configService.get<number>('port');
@@ -35,8 +41,9 @@ async function bootstrap() {
     const customLogger = app.get(NestjsLoggerServiceAdapter);
     app.useLogger(customLogger);
 
+    // Config the Swagger
     const config = new DocumentBuilder()
-        .setTitle('Your API')
+        .setTitle('Auth API')
         .setDescription('API description')
         .setVersion('1.0')
         .build();

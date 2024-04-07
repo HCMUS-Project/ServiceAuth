@@ -13,7 +13,7 @@ import {
 } from '../../../common/exceptions/exceptions';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
 import { TokenService } from '../token/token.service';
-import { changePasswordDto } from './dto/change_password';
+import { ChangePasswordDto } from './dto/change_password';
 
 @Injectable()
 export class SignInService {
@@ -25,47 +25,41 @@ export class SignInService {
 
     async signIn(_signInDto: SignInDto): Promise<any> {
         try {
-            // Validate sign in data
-            const signInData = Object.assign(new SignInDto(), _signInDto);
-            await validateOrReject(signInData);
+            const user = await this.User.findOne({ email: _signInDto.email }).select('+password');
 
             // Check if user exists
-        } catch (errors) {
-            if (errors instanceof Array && errors[0] instanceof ValidationError) {
-                const messages = errors.map(error => Object.values(error.constraints)).join(', ');
-                throw new ValidationFailedException(`Validation failed: ${messages}`);
-            } else {
-                throw new ValidationFailedException('Validation failed', errors.toString());
+            if (!user) {
+                this.logger.error('User not found for email: ' + _signInDto.email);
+                throw new UserNotFoundException('User not found for email: ' + _signInDto.email);
             }
+
+            // Check if user is active
+            if (user.is_active === false) {
+                this.logger.error('User is not active: ' + _signInDto.email);
+                throw new UnActivatedUserException('User is not active: ' + _signInDto.email);
+            }
+
+            const isPasswordMatch = await argon.verify(user.password, _signInDto.password);
+
+            // Check if password is correct
+            if (!isPasswordMatch) {
+                this.logger.error('Invalid password for user: ' + user.email);
+                throw new InvalidPasswordException('Invalid password for user: ' + user.email);
+            }
+
+            // Generate tokens
+            const tokens = await this.tokenService.getTokens(user.user_id, _signInDto.device);
+            const update_tokens = await this.tokenService.updateRefreshToken(
+                user.user_id,
+                tokens.refreshToken,
+                true,
+            );
+
+            return { tokens };
+        } catch (error) {
+            this.logger.error('Error while signing in', { error });
+            throw error;
         }
-
-        const user = await this.User.findOne({ email: _signInDto.email }).select('+password');
-
-        if (!user) {
-            this.logger.error('User not found for email: ' + _signInDto.email);
-            throw new UserNotFoundException('User not found for email: ' + _signInDto.email);
-        }
-        if (user.is_active === false) {
-            this.logger.error('User is not active: ' + _signInDto.email);
-            throw new UnActivatedUserException('User is not active: ' + _signInDto.email);
-        }
-
-        const isPasswordMatch = await argon.verify(user.password, _signInDto.password);
-
-        // Ch
-        if (!isPasswordMatch) {
-            this.logger.error('Invalid password for user: ' + user.email);
-            throw new InvalidPasswordException('Invalid password for user: ' + user.email);
-        }
-
-        const tokens = await this.tokenService.getTokens(user.user_id, _signInDto.device);
-        const update_tokens = await this.tokenService.updateRefreshToken(
-            user.user_id,
-            tokens.refreshToken,
-            true,
-        );
-
-        return { user, tokens };
     }
 
     async signOut(@Request() req) {
@@ -82,7 +76,7 @@ export class SignInService {
         }
     }
 
-    async changePassword(@Request() req, changePasswordDto: changePasswordDto) {
+    async changePassword(@Request() req, changePasswordDto: ChangePasswordDto) {
         try {
             const user = await this.User.findOne({ email: changePasswordDto.email }).select(
                 '+password',

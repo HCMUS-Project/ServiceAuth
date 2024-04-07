@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { otpDto } from './dto/otp.dto';
+import { OtpDto } from './dto/otp.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CacheStore } from '@nestjs/cache-manager';
 import { Model } from 'mongoose';
@@ -43,13 +43,13 @@ export class OtpService {
         }
     }
 
-    async checkOtpValid(otpDto: otpDto): Promise<boolean> {
+    async checkOtpValid(otpDto: OtpDto): Promise<boolean> {
         const savedOtp = await this.cacheManager.get(`otp_${otpDto.email}`);
         const isOtpValid = savedOtp === otpDto.otp;
         return isOtpValid;
     }
 
-    async activeAccount(otpDto: otpDto): Promise<boolean> {
+    async activeAccount(otpDto: OtpDto): Promise<boolean> {
         const isOtpValid = this.checkOtpValid(otpDto);
 
         let isAccountActive = false;
@@ -70,7 +70,7 @@ export class OtpService {
         return isAccountActive;
     }
 
-    async recoverPassword(otpDto: otpDto, new_password: string): Promise<boolean> {
+    async recoverPassword(otpDto: OtpDto, new_password: string): Promise<boolean> {
         const isOtpValid = this.checkOtpValid(otpDto);
         let isPasswordChange = false;
         if (isOtpValid) {

@@ -3,7 +3,7 @@ import { SignUpService } from './sign_up.service';
 import { SignUpDto } from './dto/sign_up.dto';
 import { ApiTags } from '@nestjs/swagger';
 
-@Controller('api/auth')
+@Controller('')
 export class SignUpController {
     constructor(private signUpService: SignUpService) {}
 

@@ -12,17 +12,17 @@ export class OtpController {
     }
 
     @Post('active-account')
-    async activeAccount(@Body() otpDto: otpDto): Promise<boolean> {
+    async activeAccount(@Body() otpDto: OtpDto): Promise<boolean> {
         return await this.otpService.activeAccount(otpDto);
     }
 
     @Post('check-otp-valid')
-    async checkOtpValid(@Body() otpDto: otpDto): Promise<boolean> {
+    async checkOtpValid(@Body() otpDto: OtpDto): Promise<boolean> {
         return await this.otpService.checkOtpValid(otpDto);
     }
 
     @Post('recover-password')
-    async recoverPassword(@Body() otpDto: otpDto, new_password: string): Promise<boolean> {
+    async recoverPassword(@Body() otpDto: OtpDto, new_password: string): Promise<boolean> {
         return await this.otpService.recoverPassword(otpDto, new_password);
     }
 }
