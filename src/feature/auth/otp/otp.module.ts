@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { OtpController } from "./otp.controller";
-import { OtpService } from "./otp.service";
-import {otpProvider} from "./otp.provider";
-import {DatabaseModule} from "../../../core/database/modules/database.module";
+import { OtpController } from './otp.controller';
+import { OtpService } from './otp.service';
+import { otpProvider } from './otp.provider';
+import { DatabaseModule } from '../../../core/database/modules/database.module';
 
 @Module({
     imports: [

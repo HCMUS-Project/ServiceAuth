@@ -7,11 +7,20 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
         email: {
             type: String,
             required: true,
-            unique: true,
+            // unique: true,
         },
         password: {
             type: String,
             required: true,
+        },
+        role: {
+            type: String,
+            required: true,
+        },
+        domain: {
+            type: String,
+            required: true,
+            // unique: true,
         },
         user_id: {
             type: String,
@@ -29,3 +38,5 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
     },
     { timestamps: true },
 );
+
+UserSchema.index({ email: 1, domain: 1 }, { unique: true });

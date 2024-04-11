@@ -9,14 +9,17 @@ export class SignInDto {
     readonly email: string;
 
     @ApiProperty({
-        enum: LoginSource,
         description: 'Device name',
         required: true,
-        example: LoginSource.USER,
+        example: 'iPhone 15',
     })
-    @IsEnum(LoginSource)
     @IsNotEmpty()
     readonly device: string;
+
+    @ApiProperty({ description: 'Domain', required: true, default: '30Shine' })
+    @IsNotEmpty()
+    @IsString()
+    readonly domain: string;
 
     @ApiProperty({ description: 'Password', required: true, example: '123456' })
     @IsString()

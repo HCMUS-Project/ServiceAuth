@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Role } from 'src/common/guards/role/role.enum';
 
 type JwtPayload = {
     user_id: string;
     device_id: string;
+    role: Role[];
 };
 
 @Injectable()
