@@ -9,9 +9,14 @@ import { signInProviders } from './sign_in.provider';
 import { LoggerModule } from 'src/core/logger/modules/logger.module';
 import { TokenModule } from '../token/token.module';
 import { UsersModule } from '../../user/users/users.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { join } from 'path';
 
 @Module({
-    imports: [DatabaseModule, LoggerModule, TokenModule, UsersModule],
+    imports: [
+        DatabaseModule,
+        LoggerModule,
+    ],
     controllers: [SignInController],
     providers: [SignInService, ...signInProviders],
 })

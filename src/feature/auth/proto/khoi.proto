@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package khoi;
+
+service KhoiService {
+  rpc test(testRequest) returns (testResonse); 
+}
+
+message testRequest{
+    string req = 1;
+}
+
+message testResonse{
+    string res = 1;
+}

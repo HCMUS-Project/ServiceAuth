@@ -1,6 +1,7 @@
 import {Injectable, Inject, Request} from '@nestjs/common';
 import {signInDto} from './dto/sign_in.dto';
 import {User} from 'src/models/user/interfaces/user.interface';
+import { User as User_response } from '../interface/user.interface';
 import * as argon from 'argon2';
 import {Model} from 'mongoose';
 import {isHash, validateOrReject, ValidationError} from 'class-validator';
@@ -22,7 +23,7 @@ export class SignInService
     constructor (
         @Inject('USER_MODEL') private readonly User: Model<User>,
         @Inject(LoggerKey) private logger: Logger,
-        private readonly tokenService: TokenService,
+        // private readonly tokenService: TokenService,
     ) { }
 
     async signIn (_signInDto: signInDto): Promise<any>
@@ -66,53 +67,59 @@ export class SignInService
             throw new InvalidPasswordException('Invalid password for user: ' + user.email);
         }
 
-        const tokens = await this.tokenService.getTokens(user.user_id, _signInDto.device);
-        const update_tokens = await this.tokenService.updateRefreshToken(user.user_id, tokens.refreshToken, true);
+        // const tokens = await this.tokenService.getTokens(user.user_id, _signInDto.device);
+        // const update_tokens = await this.tokenService.updateRefreshToken(user.user_id, tokens.refreshToken, true);
+        const tokens = {
+            "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTM3OWZlZmQtYmNiZC00YTZlLWFkMDgtNTBjZmFiMDNhNTYzIiwiZGV2aWNlX2lkIjoid2ViIiwiaWF0IjoxNzEyOTA1NjQzLCJleHAiOjE3MTI5MDY1NDN9.fS3zdxM8NQXcUWGEHq6yPfzN3X-Bg88v3evaiKrKqag",
+            "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTM3OWZlZmQtYmNiZC00YTZlLWFkMDgtNTBjZmFiMDNhNTYzIiwiZGV2aWNlX2lkIjoid2ViIiwiaWF0IjoxNzEyOTA1NjQzLCJleHAiOjE3MTI5OTIwNDN9.8mPYR2MtlYRkjqvGHDLDkkksnrnfQTRg3wF5Y1tsLp0",
+            "accessTokenExpiresAt": new Date(),
+            "refreshTokenExpiresAt": new Date()
+          } 
 
-        return { user, tokens };
+        return { user: user, token: tokens };
     }
 
-    async signOut (@Request() req)
-    {
-        try
-        {
-            const userId = req.user['user_id'];
-            const update_token = await this.tokenService.updateRefreshToken(userId, null, false);
-            return {
-                message: 'User successfully signed out',
-                token: update_token,
-            };
-        } catch (error)
-        {
-            this.logger.error('Error while signing out', {error});
-            throw new BadRequestException('Error while signing out', error.toString());
-        }
-    }
+    // async signOut (@Request() req)
+    // {
+    //     try
+    //     {
+    //         const userId = req.user['user_id'];
+    //         const update_token = await this.tokenService.updateRefreshToken(userId, null, false);
+    //         return {
+    //             message: 'User successfully signed out',
+    //             token: update_token,
+    //         };
+    //     } catch (error)
+    //     {
+    //         this.logger.error('Error while signing out', {error});
+    //         throw new BadRequestException('Error while signing out', error.toString());
+    //     }
+    // }
 
-    async changePassword (@Request() req, changePasswordDto: changePasswordDto){
-        try{
-            const user = await this.User.findOne({email: changePasswordDto.email}).select('+password');
-            if (!user)
-            {
-                this.logger.error('User not found for user_id: ' + changePasswordDto.email);
-                throw new UserNotFoundException('User not found for user_id: ' + changePasswordDto.email);
-            }
+    // async changePassword (@Request() req, changePasswordDto: changePasswordDto){
+    //     try{
+    //         const user = await this.User.findOne({email: changePasswordDto.email}).select('+password');
+    //         if (!user)
+    //         {
+    //             this.logger.error('User not found for user_id: ' + changePasswordDto.email);
+    //             throw new UserNotFoundException('User not found for user_id: ' + changePasswordDto.email);
+    //         }
                 
-            const isPasswordMatch = await argon.verify(user.password, changePasswordDto.oldPassword);
+    //         const isPasswordMatch = await argon.verify(user.password, changePasswordDto.oldPassword);
 
-            if (!isPasswordMatch) {
-                this.logger.error('Invalid password for user: ' + user.email);
-                throw new InvalidPasswordException('Invalid password for user: ' + user.email);
-            }
+    //         if (!isPasswordMatch) {
+    //             this.logger.error('Invalid password for user: ' + user.email);
+    //             throw new InvalidPasswordException('Invalid password for user: ' + user.email);
+    //         }
 
-            const hashedPassword = await argon.hash(changePasswordDto.newPassword);
-            const isPasswordChange = (await this.User.updateOne({email: changePasswordDto.email}, {password: hashedPassword})).acknowledged;
+    //         const hashedPassword = await argon.hash(changePasswordDto.newPassword);
+    //         const isPasswordChange = (await this.User.updateOne({email: changePasswordDto.email}, {password: hashedPassword})).acknowledged;
 
-            return isPasswordChange;
-        } catch (error)
-        {
-            this.logger.error('Error while changing password', {error});
-            throw new BadRequestException('Error while changing password', error.toString());
-        }
-    }
+    //         return isPasswordChange;
+    //     } catch (error)
+    //     {
+    //         this.logger.error('Error while changing password', {error});
+    //         throw new BadRequestException('Error while changing password', error.toString());
+    //     }
+    // }
 }

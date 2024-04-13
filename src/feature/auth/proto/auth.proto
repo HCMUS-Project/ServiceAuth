@@ -1,0 +1,93 @@
+syntax = "proto3";
+ 
+package authservice;
+
+service AuthService {
+  rpc SignInService(SignInRequest) returns (SignInResponse);
+  rpc SignUp(SignUpRequest) returns (SignUpResponse);
+  rpc SignOut(SignOutRequest) returns (SignOutResponse);
+  rpc RefreshTokens(RefreshTokensRequest) returns (RefreshTokensResponse);
+}
+
+message User {
+  string _id = 1;
+  string email = 2;
+  string password = 3;
+  bool is_deleted = 4;
+  bool is_active = 5;
+  string user_id = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+  int32 __v = 9;
+}
+
+message ShortToken {
+  string access_token = 1;
+  string refresh_token = 2;
+  string access_token_expired_at = 3;
+  string refresh_token_expired_at = 4;
+}
+
+message FullyToken {
+  string access_token = 1;
+  string refresh_token = 2;
+  string access_token_expired_at = 3;
+  string refresh_token_expired_at = 4;
+  string user_id = 5;
+  string device_id = 6;
+  string id = 7;
+  string createdAt = 8;
+  string updatedAt = 9;
+  int32 __v = 10;
+}
+
+message User_ShortToken{
+  User user = 1;
+  ShortToken shortToken = 2;
+}
+
+message SignInRequest {
+  string email = 1;
+  string password = 2;
+  string device = 3;
+}
+
+message SignInResponse {
+  int32 statusCode = 1;
+  string message = 2;
+  User_ShortToken user_token = 3;
+}
+
+message SignUpRequest {
+  string email = 1;
+  string password = 2;
+  string device = 3;
+}
+
+message SignUpResponse {
+  int32 statusCode = 1;
+  string message = 2;
+  User user = 3;
+  ShortToken short_token = 4;
+  FullyToken fully_token = 5;
+}
+
+message SignOutRequest {
+  string token = 1;
+}
+
+message SignOutResponse {
+  int32 statusCode = 1;
+  string message = 2;
+  FullyToken token = 3;
+}
+
+message RefreshTokensRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokensResponse {
+  int32 statusCode = 1;
+  string message = 2;
+  ShortToken short_token = 3;
+}

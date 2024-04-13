@@ -21,21 +21,21 @@ import {OtpModule} from "./feature/auth/otp/otp.module";
 
 @Module({
     imports: [
+        SignInModule,
         CacheModule,
         ConfigsModule,
         ContextModule,
         DatabaseModule,
-        SignUpModule,
-        SignInModule,
+        // SignUpModule,
         TokenModule,
-        UsersModule,
-        OtpModule,
+        // UsersModule,
+        // OtpModule,
         // CacheModule.registerAsync(RedisOptions)
     ],
     controllers: [AppController],
     providers: [
         AppService,
-        { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+        // { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
         // {
         //     provide: APP_INTERCEPTOR,
         //     useClass: CacheInterceptor,

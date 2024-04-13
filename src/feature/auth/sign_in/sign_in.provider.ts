@@ -7,4 +7,5 @@ export const signInProviders = [
         useFactory: (mongoose: Mongoose) => mongoose.model('user', UserSchema),
         inject: ['DATABASE_CONNECTION'],
     },
+     
 ];
