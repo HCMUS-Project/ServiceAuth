@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import Logger, { LoggerKey } from './core/logger/interfaces/logger.interface';
 import { GrpcNotFoundException, GrpcUnknownException } from 'nestjs-grpc-exceptions';
-import { Hero } from './proto/main_pb';
+import { Hero } from './proto_build/main_pb';
 
 @Injectable()
 export class AppService {

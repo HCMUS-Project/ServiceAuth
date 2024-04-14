@@ -32,6 +32,7 @@
 
 ```bash
 $ npm install
+$ npm run gen:proto_folder
 $ npm run gen:proto
 ```
 

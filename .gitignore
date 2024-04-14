@@ -4,6 +4,8 @@
 /build
 src/**/*.proto.js
 src/**/*.proto.d.ts
+src/proto_build
+
 
 # Logs
 logs

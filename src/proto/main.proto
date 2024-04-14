@@ -1,11 +1,10 @@
 syntax = "proto3";
 
-
+import public "auth/sign_in.proto";
 import public "auth/sign_up.proto";
+import public "auth/verify_account.proto";
 
 package main;
-
-// import "auth/sign_in.proto";
 
 
 service AppService {

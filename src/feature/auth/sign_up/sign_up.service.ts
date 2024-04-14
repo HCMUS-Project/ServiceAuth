@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
-import { SignUpRequest, SignUpResponse } from 'src/proto/auth/sign_up_pb';
+import { SignUpResponse } from 'src/proto_build/auth/sign_up_pb';
 import { Model } from 'mongoose';
 import { User } from 'src/models/user/interface/user.interface';
 import { GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';

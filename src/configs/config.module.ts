@@ -7,6 +7,7 @@ import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { ServiceConfig } from 'src/configs/service/service.config';
 import appConfig from './app/app.config';
 import dataBaseConfig from './database/mongo/mongo.config';
+import nodeMailerConfig from './node_mailer/node_mailer.config';
 
 @Global()
 @Module({
@@ -14,7 +15,7 @@ import dataBaseConfig from './database/mongo/mongo.config';
         NestConfigModule.forRoot({
             envFilePath: ['.env'],
             isGlobal: true,
-            load: [appConfig, dataBaseConfig],
+            load: [appConfig, dataBaseConfig, nodeMailerConfig],
         }),
     ],
     controllers: [],

@@ -2,15 +2,17 @@ syntax = "proto3";
 
 package sign_in;
 
-service SignIn {
+service SignInService {
   rpc SignIn (SignInRequest) returns (SignInResponse);
 }
 
 message SignInRequest {
   string email = 1;
   string password = 2;
+  string domain = 3;
 }
 
 message SignInResponse {
-  string token = 1;
+    string accessToken = 1;
+    string refreshToken = 2;
 }
