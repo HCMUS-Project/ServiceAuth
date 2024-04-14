@@ -15,13 +15,14 @@ async function bootstrap() {
         transport: Transport.GRPC,
         bufferLogs: true,
         options: {
-            package: 'main',
+            package: ['main', 'sign_up'],
             protoPath: join(__dirname, '../src/proto/main.proto'),
             url: `0.0.0.0:${port}`,
             loader: {
                 enums: String,
                 objects: true,
                 arrays: true,
+                includeDirs: [join(__dirname, '../src/proto/')],
             },
         },
     });

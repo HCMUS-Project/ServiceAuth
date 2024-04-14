@@ -6,6 +6,7 @@
 
 import * as grpc from "@grpc/grpc-js";
 import * as main_pb from "./main_pb";
+import * as auth_sign_up_pb from "./auth/sign_up_pb";
 
 interface IAppServiceService extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
     findOne: IAppServiceService_IFindOne;

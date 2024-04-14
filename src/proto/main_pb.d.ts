@@ -5,6 +5,7 @@
 /* eslint-disable */
 
 import * as jspb from "google-protobuf";
+import * as auth_sign_up_pb from "./auth/sign_up_pb";
 
 export class HeroById extends jspb.Message { 
     getId(): number;
