@@ -98,7 +98,9 @@ proto.sign_up.SignUpRequest.prototype.toObject = function(opt_includeInstance) {
 proto.sign_up.SignUpRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     email: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    password: jspb.Message.getFieldWithDefault(msg, 2, "")
+    password: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    domain: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    device: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
@@ -143,6 +145,14 @@ proto.sign_up.SignUpRequest.deserializeBinaryFromReader = function(msg, reader) 
       var value = /** @type {string} */ (reader.readString());
       msg.setPassword(value);
       break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDomain(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDevice(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -186,6 +196,20 @@ proto.sign_up.SignUpRequest.serializeBinaryToWriter = function(message, writer) 
       f
     );
   }
+  f = message.getDomain();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getDevice();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
+    );
+  }
 };
 
 
@@ -225,6 +249,42 @@ proto.sign_up.SignUpRequest.prototype.setPassword = function(value) {
 };
 
 
+/**
+ * optional string domain = 3;
+ * @return {string}
+ */
+proto.sign_up.SignUpRequest.prototype.getDomain = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.sign_up.SignUpRequest} returns this
+ */
+proto.sign_up.SignUpRequest.prototype.setDomain = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional string device = 4;
+ * @return {string}
+ */
+proto.sign_up.SignUpRequest.prototype.getDevice = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.sign_up.SignUpRequest} returns this
+ */
+proto.sign_up.SignUpRequest.prototype.setDevice = function(value) {
+  return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
 
 
 
@@ -257,7 +317,7 @@ proto.sign_up.SignUpResponse.prototype.toObject = function(opt_includeInstance) 
  */
 proto.sign_up.SignUpResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    token: jspb.Message.getFieldWithDefault(msg, 1, "")
+    result: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
   if (includeInstance) {
@@ -296,7 +356,7 @@ proto.sign_up.SignUpResponse.deserializeBinaryFromReader = function(msg, reader)
     switch (field) {
     case 1:
       var value = /** @type {string} */ (reader.readString());
-      msg.setToken(value);
+      msg.setResult(value);
       break;
     default:
       reader.skipField();
@@ -327,7 +387,7 @@ proto.sign_up.SignUpResponse.prototype.serializeBinary = function() {
  */
 proto.sign_up.SignUpResponse.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getToken();
+  f = message.getResult();
   if (f.length > 0) {
     writer.writeString(
       1,
@@ -338,10 +398,10 @@ proto.sign_up.SignUpResponse.serializeBinaryToWriter = function(message, writer)
 
 
 /**
- * optional string token = 1;
+ * optional string result = 1;
  * @return {string}
  */
-proto.sign_up.SignUpResponse.prototype.getToken = function() {
+proto.sign_up.SignUpResponse.prototype.getResult = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
@@ -350,7 +410,7 @@ proto.sign_up.SignUpResponse.prototype.getToken = function() {
  * @param {string} value
  * @return {!proto.sign_up.SignUpResponse} returns this
  */
-proto.sign_up.SignUpResponse.prototype.setToken = function(value) {
+proto.sign_up.SignUpResponse.prototype.setResult = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
 

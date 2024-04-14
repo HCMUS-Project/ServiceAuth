@@ -6,6 +6,7 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { ServiceConfig } from 'src/configs/service/service.config';
 import appConfig from './app/app.config';
+import dataBaseConfig from './database/mongo/mongo.config';
 
 @Global()
 @Module({
@@ -13,7 +14,7 @@ import appConfig from './app/app.config';
         NestConfigModule.forRoot({
             envFilePath: ['.env'],
             isGlobal: true,
-            load: [appConfig],
+            load: [appConfig, dataBaseConfig],
         }),
     ],
     controllers: [],

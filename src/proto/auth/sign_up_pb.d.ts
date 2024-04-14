@@ -11,6 +11,10 @@ export class SignUpRequest extends jspb.Message {
     setEmail(value: string): SignUpRequest;
     getPassword(): string;
     setPassword(value: string): SignUpRequest;
+    getDomain(): string;
+    setDomain(value: string): SignUpRequest;
+    getDevice(): string;
+    setDevice(value: string): SignUpRequest;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): SignUpRequest.AsObject;
@@ -26,12 +30,14 @@ export namespace SignUpRequest {
     export type AsObject = {
         email: string,
         password: string,
+        domain: string,
+        device: string,
     }
 }
 
 export class SignUpResponse extends jspb.Message { 
-    getToken(): string;
-    setToken(value: string): SignUpResponse;
+    getResult(): string;
+    setResult(value: string): SignUpResponse;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): SignUpResponse.AsObject;
@@ -45,6 +51,6 @@ export class SignUpResponse extends jspb.Message {
 
 export namespace SignUpResponse {
     export type AsObject = {
-        token: string,
+        result: string,
     }
 }

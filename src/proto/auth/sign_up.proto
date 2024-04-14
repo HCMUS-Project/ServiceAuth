@@ -9,8 +9,10 @@ service SignUpService {
 message SignUpRequest {
   string email = 1;
   string password = 2;
+  string domain = 3;
+  string device = 4;
 }
 
 message SignUpResponse {
-  string token = 1;
+  string result = 1;
 }
