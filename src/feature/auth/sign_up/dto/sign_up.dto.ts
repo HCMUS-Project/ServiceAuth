@@ -22,5 +22,11 @@ export class SignUpDto {
     @IsString()
     readonly device: string;
 
-    
+    @IsString()
+    @IsNotEmpty()
+    readonly user_name: string;
+
+    @IsString()
+    @IsNotEmpty()
+    readonly phone_number: string;
 }

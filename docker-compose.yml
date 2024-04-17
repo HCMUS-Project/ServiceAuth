@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  dev-db:
+    image: postgres:13
+    container_name: dev-db
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nest
+    networks:
+      - nest
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 6379:6379
+    networks:
+      - nest
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - 27018:27018
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: datn@2024
+    networks:
+      - nest
+
+networks:
+  nest:

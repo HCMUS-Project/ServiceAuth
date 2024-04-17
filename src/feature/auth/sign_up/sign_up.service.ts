@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { SignUpDto } from './dto/sign_up.dto';
 import * as argon from 'argon2';
 import { Model } from 'mongoose';
@@ -8,7 +8,9 @@ import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
 import { TokenService } from '../token/token.service';
 import { UsersService } from '../../user/users/users.service';
 import { Role } from 'src/common/guards/role/role.enum';
-
+import { exceptions } from 'winston';
+import { ForbiddenException } from 'src/common/exceptions/exceptions';
+import e from 'express';
 @Injectable()
 export class SignUpService {
     constructor(
@@ -18,7 +20,7 @@ export class SignUpService {
     ) {}
 
     async signUp(_signUpDto: SignUpDto): Promise<any> {
-        try {
+        try{
             const hashedPassword = await argon.hash(_signUpDto.password);
 
             // Check if user already exists and is active
@@ -28,15 +30,14 @@ export class SignUpService {
             });
             if (checkUser) {
                 if (checkUser.is_active === true) {
-                    throw new ForbiddenException(
-                        'USER_ALREADY_REGISTERED',
-                        'User is already registered. But not activated yet. Please activate your account.',
-                    );
+                    this.logger.error('User already registerd: ' + checkUser.email);
+                    throw new ForbiddenException('USER_ALREADY_REGISTER: ' + checkUser.email);
                 } else {
-                    throw new ForbiddenException('USER_ALREADY_REGISTER', 'User already exists');
+                    this.logger.error('User already registerd: ' + checkUser.email);
+                    throw new ForbiddenException('USER_ALREADY_REGISTER: ' + checkUser.email);
                 }
             }
-
+    
             // Save user to database
             const newUser = new this.User({
                 email: _signUpDto.email,
@@ -45,9 +46,9 @@ export class SignUpService {
                 password: hashedPassword,
                 role: Role.USER,
             });
-
+    
             const user = await newUser.save();
-
+    
             // Generate, save and update hashed refresh_token
             const tokens = await this.tokenService.createAndGetTokens(
                 user.user_id,
@@ -55,7 +56,7 @@ export class SignUpService {
                 user.role,
                 _signUpDto.device,
             );
-
+    
             this.tokenService.saveToken(
                 tokens.domain,
                 tokens.role,
@@ -66,16 +67,18 @@ export class SignUpService {
                 tokens.accessTokenExpiresAt,
                 tokens.refreshTokenExpiresAt,
             );
-
+    
             const new_tokens = await this.tokenService.updateTokens(
                 user.user_id,
                 tokens.refreshToken,
                 true,
             );
-
+    
             return { new_tokens };
-        } catch (error) {
-            this.logger.error('Error while signing up user', { error });
+        }
+        catch (error) {
+            this.logger.error('Error while signing up', { error });
+            throw error;
         }
     }
 
@@ -90,12 +93,10 @@ export class SignUpService {
             });
             if (checkUser) {
                 if (checkUser.is_active === true) {
-                    throw new ForbiddenException(
-                        'TENANT_ALREADY_REGISTERED',
-                        'Tenant is already registered. But not activated yet. Please activate your account.',
-                    );
-                } else {
-                    throw new ForbiddenException('USER_ALREADY_REGISTER', 'Tenant already exists');
+                    throw new ForbiddenException('TENANT_ALREADY_REGISTERED: ' + checkUser.email)
+                }
+                else {
+                    throw new ForbiddenException('USER_ALREADY_REGISTER: ' + checkUser.email);
                 }
             }
 
@@ -136,7 +137,7 @@ export class SignUpService {
 
             return { new_tokens };
         } catch (error) {
-            this.logger.error('Error while signing up tenant', { error });
+            throw Error(error);
         }
     }
 }

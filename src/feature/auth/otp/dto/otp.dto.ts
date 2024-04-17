@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
 
 export class OtpDto {
     @ApiProperty({ description: 'Domain', required: true, default: '30Shine' })
@@ -15,6 +15,6 @@ export class OtpDto {
 
     @ApiProperty({ description: 'OTP code', required: true, example: '123456' })
     @IsString()
-    @IsNotEmpty({ message: 'OTP must not be empty' })
+    @IsOptional()
     otp: string;
 }

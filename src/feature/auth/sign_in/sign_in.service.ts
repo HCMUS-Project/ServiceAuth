@@ -25,7 +25,7 @@ export class SignInService {
 
     async signIn(_signInDto: SignInDto): Promise<any> {
         try {
-            const user = await this.User.findOne({ email: _signInDto.email }).select('+password');
+            const user = await this.User.findOne({ email: _signInDto.email, domain: _signInDto.domain }).select('+password');
 
             // Check if user exists
             if (!user) {
@@ -83,7 +83,7 @@ export class SignInService {
 
     async changePassword(@Request() req, changePasswordDto: ChangePasswordDto) {
         try {
-            const user = await this.User.findOne({ email: changePasswordDto.email }).select(
+            const user = await this.User.findOne({ email: changePasswordDto.email, domain: changePasswordDto.email }).select(
                 '+password',
             );
             if (!user) {

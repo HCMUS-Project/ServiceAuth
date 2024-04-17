@@ -4,7 +4,8 @@ import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from
 export class ExceptionsFilter implements ExceptionFilter {
     catch(exception: unknown, host: ArgumentsHost): void {
         const ctx = host.switchToHttp();
-
+        console.log('exception', exception);
+        
         const status =
             exception instanceof HttpException
                 ? exception.getStatus()

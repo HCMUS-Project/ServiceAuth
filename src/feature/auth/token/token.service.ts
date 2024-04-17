@@ -14,6 +14,7 @@ import {
 import * as argon from 'argon2';
 import { addMinutes, addHours } from 'date-fns';
 import { Role } from 'src/common/guards/role/role.enum';
+import { SignInDto } from '../sign_in/dto/sign_in.dto';
 
 @Injectable()
 export class TokenService {
@@ -25,6 +26,22 @@ export class TokenService {
     ) {}
 
     async createAccessToken(user_id: string, domain: String, role: Role, device: string) {
+        const accessToken = await this.jwtService.signAsync(
+            {
+                user_id,
+                domain,
+                role,
+                device,
+            },
+            {
+                secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+                expiresIn: '15m',
+            },
+        );
+        return accessToken;
+    }
+
+    async getAccessToken(user_id: string, domain: string, role: string, device: string) {
         const accessToken = await this.jwtService.signAsync(
             {
                 user_id,
