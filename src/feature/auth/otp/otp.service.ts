@@ -30,7 +30,7 @@ export class OtpService {
             }
             const generate_otp = this.generateOTP();
 
-            await this.cacheManager.set(`otp_${otpDto.email}`, `${generate_otp}`, { ttl: 600 });
+            await this.cacheManager.set(`otp_${otpDto.domain}_${otpDto.email}`, `${generate_otp}`, { ttl: 600 });
 
             const response = await this.mailerService.sendMail({
                 to: otpDto.email,
@@ -44,7 +44,7 @@ export class OtpService {
     }
 
     async checkOtpValid(otpDto: OtpDto): Promise<boolean> {
-        const savedOtp = await this.cacheManager.get(`otp_${otpDto.email}`);
+        const savedOtp = await this.cacheManager.get(`otp_${otpDto.domain}_${otpDto.email}`);
         const isOtpValid = savedOtp === otpDto.otp;
         return isOtpValid;
     }
@@ -54,18 +54,18 @@ export class OtpService {
 
         let isAccountActive = false;
         if (isOtpValid) {
-            const user = await this.User.findOne({ email: otpDto.email }).select('+password');
+            const user = await this.User.findOne({ email: otpDto.email, domain: otpDto.domain }).select('+password');
             if (!user) {
                 this.logger.error('User not found for email: ' + otpDto.email);
                 throw new UserNotFoundException('User not found for email: ' + otpDto.email);
             } else {
                 const result = await this.User.updateOne(
-                    { email: otpDto.email },
+                    { email: otpDto.email, domain: otpDto.domain},
                     { is_active: true },
                 );
                 isAccountActive = result.acknowledged;
             }
-            await this.cacheManager.del(`otp_${otpDto.email}`);
+            await this.cacheManager.del(`otp_${otpDto.domain}_${otpDto.email}`);
         }
         return isAccountActive;
     }
@@ -74,18 +74,18 @@ export class OtpService {
         const isOtpValid = this.checkOtpValid(otpDto);
         let isPasswordChange = false;
         if (isOtpValid) {
-            const user = await this.User.findOne({ email: otpDto.email }).select('+password');
+            const user = await this.User.findOne({ email: otpDto.email, domain: otpDto.domain }).select('+password');
             if (!user) {
                 this.logger.error('User not found for email: ' + otpDto.email);
                 throw new UserNotFoundException('User not found for email: ' + otpDto.email);
             } else {
                 const result = await this.User.updateOne(
-                    { email: otpDto.email },
+                    { email: otpDto.email, domain: otpDto.domain },
                     { password: new_password },
                 );
                 isPasswordChange = result.acknowledged;
             }
-            await this.cacheManager.del(`otp_${otpDto.email}`);
+            await this.cacheManager.del(`otp_${otpDto.domain}_${otpDto.email}`);
         }
         return isPasswordChange;
     }

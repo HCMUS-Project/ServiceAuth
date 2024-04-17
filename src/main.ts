@@ -8,6 +8,7 @@ import { ExceptionsFilter } from './core/responses/filter/exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { fastifyHelmet } from '@fastify/helmet';
+import { RolesGuard } from 'src/common/guards/role/role.guard';
 
 async function bootstrap() {
     const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
@@ -49,6 +50,9 @@ async function bootstrap() {
         .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
+
+    // Config the role guard
+    app.useGlobalGuards(new RolesGuard());
 
     // Listen on the port
     await app.listen(port, async () => {

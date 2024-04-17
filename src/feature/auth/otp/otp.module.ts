@@ -1,23 +1,24 @@
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { OtpController } from "./otp.controller";
-import { OtpService } from "./otp.service";
-import {otpProvider} from "./otp.provider";
-import {DatabaseModule} from "../../../core/database/modules/database.module";
+import { OtpController } from './otp.controller';
+import { OtpService } from './otp.service';
+import { otpProvider } from './otp.provider';
+import { DatabaseModule } from '../../../core/database/modules/database.module';
 
 @Module({
     imports: [
         MailerModule.forRoot({
             transport: {
+                service: 'gmail',
                 host: 'smtp.gmail.com',
                 port: 587,
                 auth: {
-                    user: 'vannghia943@gmail.com',
-                    pass: 'yzrc gaii itak ayqm',
+                    user: process.env.MAILER_USER,
+                    pass: process.env.MAILER_PASS,
                 },
             },
             defaults: {
-                from: '"No Reply" <no-reply@gmail.com>',
+                from: '"No Reply" <no-reply@example.com>',
             },
         }),
         DatabaseModule,

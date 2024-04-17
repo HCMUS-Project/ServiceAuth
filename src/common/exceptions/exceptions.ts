@@ -37,7 +37,7 @@ export class ValidationFailedException extends BadRequestException {
 }
 
 export class ForbiddenException extends BadRequestException {
-    constructor(message: string, error: string) {
+    constructor(message = 'Permission denied', error?: string) {
         super(message, error);
     }
 }

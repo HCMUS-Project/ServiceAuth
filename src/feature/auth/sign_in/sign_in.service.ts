@@ -25,7 +25,7 @@ export class SignInService {
 
     async signIn(_signInDto: SignInDto): Promise<any> {
         try {
-            const user = await this.User.findOne({ email: _signInDto.email }).select('+password');
+            const user = await this.User.findOne({ email: _signInDto.email, domain: _signInDto.domain }).select('+password');
 
             // Check if user exists
             if (!user) {
@@ -48,8 +48,13 @@ export class SignInService {
             }
 
             // Generate tokens
-            const tokens = await this.tokenService.getTokens(user.user_id, _signInDto.device);
-            const update_tokens = await this.tokenService.updateRefreshToken(
+            const tokens = await this.tokenService.createAndGetTokens(
+                user.user_id,
+                _signInDto.domain,
+                user.role,
+                _signInDto.device,
+            );
+            const update_tokens = await this.tokenService.updateTokens(
                 user.user_id,
                 tokens.refreshToken,
                 true,
@@ -65,7 +70,7 @@ export class SignInService {
     async signOut(@Request() req) {
         try {
             const userId = req.user['user_id'];
-            const update_token = await this.tokenService.updateRefreshToken(userId, null, false);
+            const update_token = await this.tokenService.updateTokens(userId, null, false);
             return {
                 message: 'User successfully signed out',
                 token: update_token,
@@ -78,7 +83,7 @@ export class SignInService {
 
     async changePassword(@Request() req, changePasswordDto: ChangePasswordDto) {
         try {
-            const user = await this.User.findOne({ email: changePasswordDto.email }).select(
+            const user = await this.User.findOne({ email: changePasswordDto.email, domain: changePasswordDto.email }).select(
                 '+password',
             );
             if (!user) {
