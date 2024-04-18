@@ -8,7 +8,7 @@ export class SignInController {
     constructor(private readonly signInService: SignInService) {}
 
     @GrpcMethod('SignInService', 'SignIn')
-    async signUp(data: SignInRequest): Promise<SignInResponse> {
+    async signIn(data: SignInRequest): Promise<SignInResponse> {
         return await this.signInService.signIn(data);
     }
 }
