@@ -2,11 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
 import { Model } from 'mongoose';
 import { User } from 'src/models/user/interface/user.interface';
-import { Role } from 'src/common/enums/role.enum';
-import { SignInResponse } from 'src/proto_build/auth/sign_in_pb';
 import { GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
 import * as argon from 'argon2';
 import { Jwt } from 'src/util/jwt/jwt';
+import { ISignInRequest, ISignInResponse } from './interface/sign_in.interface';
 
 @Injectable()
 export class SignInService {
@@ -16,7 +15,7 @@ export class SignInService {
         private readonly jwtService: Jwt,
     ) {}
 
-    async signIn(data): Promise<SignInResponse> {
+    async signIn(data: ISignInRequest): Promise<ISignInResponse> {
         try {
             // Check if user already exists and is active
             const checkUser = await this.User.findOne({
@@ -36,21 +35,20 @@ export class SignInService {
 
             // Generate access token and refresh token
             const accessToken = await this.jwtService.createAccessToken(
-                checkUser._id,
                 checkUser.email,
                 checkUser.domain,
-                Role.USER,
+                checkUser.role,
             );
             const refreshToken = await this.jwtService.createRefreshToken(
-                checkUser._id,
                 checkUser.email,
                 checkUser.domain,
+                checkUser.role,
             );
 
             // Save token to cache
             this.jwtService.saveToken(checkUser.email, checkUser.domain, accessToken, refreshToken);
 
-            return Object.assign(new SignInResponse(), { accessToken, refreshToken });
+            return { accessToken, refreshToken };
         } catch (error) {
             throw error;
         }

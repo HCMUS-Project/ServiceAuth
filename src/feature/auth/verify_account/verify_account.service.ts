@@ -3,10 +3,15 @@ import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
 import { Model } from 'mongoose';
 import { User } from 'src/models/user/interface/user.interface';
 import { GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
-import { SendMailResponse, VerifyAccountResponse } from 'src/proto_build/auth/verify_account_pb';
 import { generateOtp } from 'src/common/otp/otp';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CACHE_MANAGER, CacheStore } from '@nestjs/cache-manager';
+import {
+    ISendMailRequest,
+    ISendMailResponse,
+    IVerifyAccountRequest,
+    IVerifyAccountResponse,
+} from './interface/verify_account.interface';
 
 @Injectable()
 export class VerifyAccountService {
@@ -17,7 +22,7 @@ export class VerifyAccountService {
         @Inject(CACHE_MANAGER) private cacheManager: CacheStore,
     ) {}
 
-    async verifyAccount(data): Promise<VerifyAccountResponse> {
+    async verifyAccount(data: IVerifyAccountRequest): Promise<IVerifyAccountResponse> {
         try {
             // Check if the user exists
             let user = await this.User.findOne({
@@ -33,7 +38,6 @@ export class VerifyAccountService {
 
             // Check OTP
             const otp = await this.cacheManager.get(`otp:${data.email}/${data.domain}`);
-            console.log(otp);
 
             if (!otp) throw new GrpcUnauthenticatedException('OTP_EXPIRED');
             if (otp !== data.otp) throw new GrpcUnauthenticatedException('OTP_INVALID');
@@ -49,13 +53,13 @@ export class VerifyAccountService {
                 },
             );
 
-            return Object.assign(new VerifyAccountResponse(), { result: 'success' });
+            return { result: 'success' };
         } catch (error) {
             throw error;
         }
     }
 
-    async sendMailOtp(data): Promise<SendMailResponse> {
+    async sendMailOtp(data: ISendMailRequest): Promise<ISendMailResponse> {
         try {
             // Check if the user exists
             let user = await this.User.findOne({
@@ -80,7 +84,7 @@ export class VerifyAccountService {
                 text: `Your One Time Password (OTP): ${otp}`,
             });
 
-            return Object.assign(new SendMailResponse(), { result: 'success' });
+            return { result: 'success' };
         } catch (error) {
             throw error;
         }

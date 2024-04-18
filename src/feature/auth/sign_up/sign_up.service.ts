@@ -6,6 +6,7 @@ import { User } from 'src/models/user/interface/user.interface';
 import { GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
 import * as argon from 'argon2';
 import { Role } from 'src/common/enums/role.enum';
+import { ISignUpRequest, ISignUpResponse } from './interface/sign_up.interface';
 
 export class SignUpService {
     constructor(
@@ -13,7 +14,7 @@ export class SignUpService {
         @Inject('SIGN_UP_MODEL') private readonly User: Model<User>,
     ) {}
 
-    async signUp(data): Promise<SignUpResponse> {
+    async signUp(data: ISignUpRequest): Promise<ISignUpResponse> {
         this.logger.debug('signUp', { props: data });
 
         try {
@@ -34,7 +35,7 @@ export class SignUpService {
 
             await newUser.save();
 
-            return Object.assign(new SignUpResponse(), { result: 'success' });
+            return { result: 'success' };
         } catch (error) {
             throw error;
         }

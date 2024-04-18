@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package verify_account;
+package verifyAccount;
 
 service VerifyAccountService {
     rpc VerifyAccount(VerifyAccountRequest) returns (VerifyAccountResponse);

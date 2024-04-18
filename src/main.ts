@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
-import NestjsLoggerServiceAdapter from './core/logger/modules/logger.adapter';
 
 async function bootstrap() {
     // Create a ConfigService instance
@@ -15,7 +14,15 @@ async function bootstrap() {
         transport: Transport.GRPC,
         bufferLogs: true,
         options: {
-            package: ['main', 'sign_up', 'verify_account', 'sign_in'],
+            package: [
+                'main',
+                'signUp',
+                'verifyAccount',
+                'signIn',
+                'refreshToken',
+                'userToken',
+                'signOut',
+            ],
             protoPath: join(__dirname, '../src/proto/main.proto'),
             url: `0.0.0.0:${port}`,
             loader: {

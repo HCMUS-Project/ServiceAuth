@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package sign_in;
+package signIn;
 
 service SignInService {
   rpc SignIn (SignInRequest) returns (SignInResponse);
@@ -13,6 +13,6 @@ message SignInRequest {
 }
 
 message SignInResponse {
-    string accessToken = 1;
-    string refreshToken = 2;
+    string access_token = 1;
+    string refresh_token = 2;
 }

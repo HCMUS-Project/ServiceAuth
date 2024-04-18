@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package sign_up;
+package signUp;
 
 service SignUpService {
   rpc SignUp (SignUpRequest) returns (SignUpResponse);

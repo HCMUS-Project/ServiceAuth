@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose';
 import { User as UserInterface } from '../interface/user.interface';
 import { v4 as uuidv4 } from 'uuid';
+import { Role } from 'src/proto_build/auth/user_token_pb';
 
 export const UserSchema = new mongoose.Schema<UserInterface>(
     {
@@ -14,8 +15,9 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
             required: true,
         },
         role: {
-            type: String,
+            type: Number,
             required: true,
+            enum: Object.values(Role),
         },
         domain: {
             type: String,
