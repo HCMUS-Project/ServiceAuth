@@ -22,6 +22,7 @@ async function bootstrap() {
                 'refreshToken',
                 'userToken',
                 'signOut',
+                'profile',
             ],
             protoPath: join(__dirname, '../src/proto/main.proto'),
             url: `0.0.0.0:${port}`,

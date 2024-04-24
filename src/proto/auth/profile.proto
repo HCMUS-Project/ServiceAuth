@@ -6,7 +6,7 @@ package profile;
 
 service ProfileService {
     rpc GetProfile (GetProfileRequest) returns (GetProfileResponse);
-    // rpc EditProfile(EditProfileRequest) returns (EditProfileResponse);
+    rpc UpdateProfile (UpdateProfileRequest) returns (UpdateProfileResponse);
 }
 
 message GetProfileRequest {
@@ -15,11 +15,24 @@ message GetProfileRequest {
 
 message GetProfileResponse {
     string email = 1;
-    string role = 2;
+    int32 role = 2;
     string domain = 3;
     string phone = 4;
     string address = 5;
     string name = 6;
     string gender = 7;
-    string age = 8;
+    int32 age = 8;
+}
+
+message UpdateProfileRequest {
+    userToken.User user = 1;
+    optional string phone = 2;
+    optional string address = 3;
+    optional string name = 4;
+    optional string gender = 5;
+    optional int32 age = 6;
+}
+
+message UpdateProfileResponse {
+    string result = 1;
 }

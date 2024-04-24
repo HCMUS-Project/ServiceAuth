@@ -4,11 +4,10 @@ import "auth/sign_in.proto";
 import "auth/sign_up.proto";
 import "auth/verify_account.proto";
 import "auth/refresh_token.proto";
-import "auth/sign_out.proto";
 import "auth/profile.proto";
+import "auth/sign_out.proto";
 
 package main;
-
 
 service AppService {
   rpc FindOne (HeroById) returns (Hero) {}

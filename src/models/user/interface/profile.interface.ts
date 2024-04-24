@@ -1,8 +1,6 @@
 import { Document } from 'mongoose';
 
 export interface Profile extends Document {
-    readonly id: string;
-    readonly user_id: string;
     readonly phone: string;
     readonly gender: string;
     readonly address: string;

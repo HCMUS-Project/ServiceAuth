@@ -31,19 +31,8 @@ export class SignUpService {
             });
             if (checkUser) throw new GrpcUnauthenticatedException('USER_ALREADY_REGISTER');
 
-            // Save user to database
-            const newUser = new this.User({
-                email: data.email,
-                password: await argon.hash(data.password),
-                domain: data.domain,
-                role: Role.USER,
-            });
-
-            await newUser.save();
-
             // Save profile user
             const newProfile = new this.Profile({
-                user_id: newUser.id,
                 phone: data.phone,
                 address: data.address,
                 age: data.age,
@@ -53,6 +42,16 @@ export class SignUpService {
             });
 
             await newProfile.save();
+            // Save user to database
+            const newUser = new this.User({
+                email: data.email,
+                password: await argon.hash(data.password),
+                domain: data.domain,
+                role: Role.USER,
+                profile_id: newProfile.id,
+            });
+
+            await newUser.save();
 
             // if everything is ok, send mail to verify account
             const otp = generateOtp(6);

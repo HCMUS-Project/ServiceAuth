@@ -1,0 +1,73 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { Model } from 'mongoose';
+import { User } from 'src/models/user/interface/user.interface';
+import { Profile } from 'src/models/user/interface/profile.interface';
+import { IGetProfileResponse, IUpdateProfileResponse } from './interface/profile.interface';
+import { GrpcInternalException, GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
+
+@Injectable()
+export class ProfileService {
+    constructor(
+        @Inject('USER_MODEL') private readonly User: Model<User>,
+        @Inject('PROFILE_MODEL') private readonly Profile: Model<Profile>,
+    ) {}
+
+    async getProfile(email: string, domain: string): Promise<IGetProfileResponse> {
+        try {
+            // check if user exists
+            const user = await this.User.findOne({ email, domain, is_deleted: false }).populate(
+                'profile_id',
+            );
+
+            if (!user) throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
+            if (!user.is_active) throw new GrpcUnauthenticatedException('USER_NOT_ACTIVE');
+
+            const { role, profile_id } = user;
+            if (typeof profile_id !== 'string') {
+                const { age, phone, address, gender, name } = profile_id;
+                return {
+                    email,
+                    domain,
+                    role: role,
+                    age,
+                    phone,
+                    address,
+                    gender,
+                    name,
+                };
+            }
+            throw new GrpcInternalException('INTERNAL_ERROR');
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateProfile(
+        email: string,
+        domain: string,
+        data: object,
+    ): Promise<IUpdateProfileResponse> {
+        try {
+            // check if user exists
+            const user = await this.User.findOne({ email, domain, is_deleted: false });
+
+            if (!user) throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
+            if (!user.is_active) throw new GrpcUnauthenticatedException('USER_NOT_ACTIVE');
+
+            // Check if data is an object with at least one field
+            if (typeof data !== 'object' || Object.keys(data).length === 0) {
+                return { result: 'no valid data' };
+            }
+
+            // update profile
+            const updateResult = await this.Profile.updateOne({ _id: user.profile_id }, data);
+
+            if (updateResult.modifiedCount === 0) {
+                throw new GrpcInternalException('UPDATE_FAILED');
+            }
+            return { result: 'success' };
+        } catch (error) {
+            throw error;
+        }
+    }
+}

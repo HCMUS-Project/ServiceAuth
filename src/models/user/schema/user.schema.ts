@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose';
 import { User as UserInterface } from '../interface/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { Role } from 'src/proto_build/auth/user_token_pb';
+import { ProfileUserSchema } from './profile.schema';
 
 export const UserSchema = new mongoose.Schema<UserInterface>(
     {
@@ -31,6 +32,10 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
         is_active: {
             type: Boolean,
             default: false,
+        },
+        profile_id: {
+            type: String,
+            ref: 'profile',
         },
     },
     { timestamps: true },
