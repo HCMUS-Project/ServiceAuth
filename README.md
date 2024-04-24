@@ -55,3 +55,43 @@ $ npm run start:prod
 # copy from example.env
 $ cp example.env .env
 ```
+
+# Commit Guidelines
+
+When making a commit to this project, please follow these guidelines to help keep our commit history clean and easy to understand.
+
+## Commit Message Format
+
+Each commit message should be formatted as follows:
+
+```bash
+<type>: <subject>
+```
+
+`<type>` is a descriptor representing the purpose of the commit. It can be one of the following:
+
+-   `"feat"`: A new feature for the user; not a new feature for build script.
+-   `"fix"`: A bug fix for the user; not a fix to a build script.
+-   `"docs"`: Changes to documentation only.
+-   `"style"`: Changes to the styling of the code (e.g., indentation, white-space, etc); no production code change.
+-   `"refactor"`: Refactoring production code; no new feature or bug fix.
+-   `"perf"`: A code change that improves performance.
+-   `"test"`: Adding missing tests; no production code change.
+-   `"chore"`: Changes to build process or auxiliary tools and libraries; no production code change.
+-   `"ci"`: Changes to our Continuous Integration configuration files and scripts.
+-   `"revert"`: Reverts a previous commit.
+
+`<subject>` is a brief description of the changes, written in the imperative, present tense.
+
+## Example Commit Messages
+
+-   `"feat: add search functionality"`
+-   `"fix: resolve issue with user login"`
+-   `"docs: update API endpoint documentation"`
+-   `"style: convert tabs to spaces"`
+-   `"refactor: simplify API request logic"`
+-   `"perf: improve load time for user list"`
+-   `"test: add unit tests for user registration"`
+-   `"chore: update build script"`
+-   `"ci: add Dockerfile"`
+-   `"revert: undo last commit"`
