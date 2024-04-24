@@ -11,6 +11,12 @@ message SignUpRequest {
   string password = 2;
   string domain = 3;
   string device = 4;
+
+  string phone = 5;
+  string gender = 6;
+  string address = 7;
+  int32 age = 8;
+  string name = 9;
 }
 
 message SignUpResponse {

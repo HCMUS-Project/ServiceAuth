@@ -24,11 +24,6 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
             required: true,
             // unique: true,
         },
-        user_id: {
-            type: String,
-            default: () => uuidv4(),
-            unique: true,
-        },
         is_deleted: {
             type: Boolean,
             default: false,

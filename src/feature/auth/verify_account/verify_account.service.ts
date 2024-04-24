@@ -81,7 +81,7 @@ export class VerifyAccountService {
             await this.mailerService.sendMail({
                 to: data.email,
                 subject: 'OTP verify account',
-                text: `Your One Time Password (OTP): ${otp}`,
+                text: `Your OTP is: ${otp}`,
             });
 
             return { result: 'success' };

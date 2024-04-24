@@ -1,17 +1,23 @@
 import { Inject } from '@nestjs/common';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
-import { SignUpResponse } from 'src/proto_build/auth/sign_up_pb';
 import { Model } from 'mongoose';
 import { User } from 'src/models/user/interface/user.interface';
+import { Profile } from 'src/models/user/interface/profile.interface';
 import { GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
 import * as argon from 'argon2';
 import { Role } from 'src/common/enums/role.enum';
 import { ISignUpRequest, ISignUpResponse } from './interface/sign_up.interface';
+import { MailerService } from '@nestjs-modules/mailer';
+import { generateOtp } from 'src/common/otp/otp';
+import { CACHE_MANAGER, CacheStore } from '@nestjs/cache-manager';
 
 export class SignUpService {
     constructor(
         @Inject(LoggerKey) private logger: Logger,
-        @Inject('SIGN_UP_MODEL') private readonly User: Model<User>,
+        @Inject('USER_MODEL') private readonly User: Model<User>,
+        @Inject('PROFILE_MODEL') private readonly Profile: Model<Profile>,
+        @Inject(CACHE_MANAGER) private cacheManager: CacheStore,
+        private readonly mailerService: MailerService,
     ) {}
 
     async signUp(data: ISignUpRequest): Promise<ISignUpResponse> {
@@ -35,8 +41,32 @@ export class SignUpService {
 
             await newUser.save();
 
+            // Save profile user
+            const newProfile = new this.Profile({
+                user_id: newUser.id,
+                phone: data.phone,
+                address: data.address,
+                age: data.age,
+                gender: data.gender,
+                avatar: '',
+                name: data.name,
+            });
+
+            await newProfile.save();
+
+            // if everything is ok, send mail to verify account
+            const otp = generateOtp(6);
+            this.cacheManager.set(`otp:${data.email}/${data.domain}`, otp, { ttl: 300 });
+
+            await this.mailerService.sendMail({
+                to: data.email,
+                subject: 'OTP verify account',
+                text: `Your OTP is ${otp}`,
+            });
+
             return { result: 'success' };
         } catch (error) {
+            this.logger.error('signUp', { props: error });
             throw error;
         }
     }

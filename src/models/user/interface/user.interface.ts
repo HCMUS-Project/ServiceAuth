@@ -6,7 +6,6 @@ export interface User extends Document {
     readonly password: string;
     readonly role: Role;
     readonly domain: string;
-    readonly user_id: string;
     readonly is_deleted: boolean;
     readonly is_active: boolean;
 }

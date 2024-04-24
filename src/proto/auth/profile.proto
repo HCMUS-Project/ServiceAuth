@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "auth/user_token.proto";
+
+package profile;
+
+service ProfileService {
+    rpc GetProfile (GetProfileRequest) returns (GetProfileResponse);
+    // rpc EditProfile(EditProfileRequest) returns (EditProfileResponse);
+}
+
+message GetProfileRequest {
+    userToken.User user = 1;
+}
+
+message GetProfileResponse {
+    string email = 1;
+    string role = 2;
+    string domain = 3;
+    string phone = 4;
+    string address = 5;
+    string name = 6;
+    string gender = 7;
+    string age = 8;
+}
