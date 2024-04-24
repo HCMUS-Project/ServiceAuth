@@ -1,26 +1,14 @@
-import { Controller, Get, Post, Body, Request, UseGuards } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { GrpcMethod } from '@nestjs/microservices';
 import { SignInService } from './sign_in.service';
-import { SignInDto } from './dto/sign_in.dto';
-import { AccessTokenGuard } from 'src/common/guards/token/accessToken.guard';
+import { ISignInRequest, ISignInResponse } from './interface/sign_in.interface';
 
-@Controller('')
+@Controller()
 export class SignInController {
     constructor(private readonly signInService: SignInService) {}
 
-    @Post('sign-in')
-    async signIn(@Body() signInDto: SignInDto) {
-        return await this.signInService.signIn(signInDto);
-    }
-
-    @UseGuards(AccessTokenGuard)
-    @Get('sign-out')
-    async signOut(@Request() req) {
-        return await this.signInService.signOut(req);
-    }
-
-    @UseGuards(AccessTokenGuard)
-    @Post('change-password')
-    async changePassword(@Request() req, @Body() changePasswordDto) {
-        return await this.signInService.changePassword(req, changePasswordDto);
+    @GrpcMethod('SignInService', 'SignIn')
+    async signIn(data: ISignInRequest): Promise<ISignInResponse> {
+        return await this.signInService.signIn(data);
     }
 }

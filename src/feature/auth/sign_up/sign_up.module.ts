@@ -1,14 +1,26 @@
 import { Module } from '@nestjs/common';
-import { SignUpService } from './sign_up.service';
 import { SignUpController } from './sign_up.controller';
-import { signUpProviders } from './sign_up.providers';
-import { TokenModule } from '../token/token.module';
-import { UsersModule } from '../../user/users/users.module';
-import { DatabaseModule } from 'src/core/database/modules/database.module';
+import { SignUpService } from './sign_up.service';
+import { Mongoose } from 'mongoose';
+import { UserSchema } from 'src/models/user/schema/user.schema';
+import { NodeMailerModule } from 'src/util/node_mailer/node_mailer.module';
+import { ProfileUserSchema } from 'src/models/user/schema/profile.schema';
 
 @Module({
-    imports: [TokenModule, UsersModule],
+    imports: [NodeMailerModule],
     controllers: [SignUpController],
-    providers: [SignUpService, ...signUpProviders],
+    providers: [
+        SignUpService,
+        {
+            provide: 'USER_MODEL',
+            useFactory: (mongoose: Mongoose) => mongoose.model('user', UserSchema),
+            inject: ['DATABASE_CONNECTION'],
+        },
+        {
+            provide: 'PROFILE_MODEL',
+            useFactory: (mongoose: Mongoose) => mongoose.model('profile', ProfileUserSchema),
+            inject: ['DATABASE_CONNECTION'],
+        },
+    ],
 })
 export class SignUpModule {}

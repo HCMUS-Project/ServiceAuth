@@ -1,20 +1,19 @@
-/**
- *
- */
-
 import { Module } from '@nestjs/common';
-import { SignInModule } from './sign_in/sign_in.module';
 import { SignUpModule } from './sign_up/sign_up.module';
-import { RouteConfig } from '@nestjs/platform-fastify';
-import { RouterModule } from '@nestjs/core';
+import { VerifyAccountModule } from './verify_account/verify_account.module';
+import { SignInModule } from './sign_in/sign_in.module';
+import { RefreshTokenModule } from './refresh_token/refresh_token.module';
+import { SignOutModule } from './sign_out/sign_out.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
     imports: [
-        SignInModule,
         SignUpModule,
-        RouterModule.register([{ path: 'api/auth', children: [SignInModule, SignUpModule] }]),
+        VerifyAccountModule,
+        SignInModule,
+        RefreshTokenModule,
+        SignOutModule,
+        ProfileModule,
     ],
-    controllers: [],
-    providers: [],
 })
 export class AuthModule {}

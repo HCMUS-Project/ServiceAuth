@@ -1,68 +1,71 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { SignUpDto } from './dto/sign_up.dto';
-import * as argon from 'argon2';
-import { Model } from 'mongoose';
-import { User } from 'src/models/user/interfaces/user.interface';
-import { validateOrReject, ValidationError } from 'class-validator';
+import { Inject } from '@nestjs/common';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
-import { TokenService } from '../token/token.service';
-import { UsersService } from '../../user/users/users.service';
+import { Model } from 'mongoose';
+import { User } from 'src/models/user/interface/user.interface';
+import { Profile } from 'src/models/user/interface/profile.interface';
+import { GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
+import * as argon from 'argon2';
+import { Role } from 'src/common/enums/role.enum';
+import { ISignUpRequest, ISignUpResponse } from './interface/sign_up.interface';
+import { MailerService } from '@nestjs-modules/mailer';
+import { generateOtp } from 'src/common/otp/otp';
+import { CACHE_MANAGER, CacheStore } from '@nestjs/cache-manager';
 
-@Injectable()
 export class SignUpService {
     constructor(
-        @Inject('SIGN_UP_MODEL') private readonly User: Model<User>,
         @Inject(LoggerKey) private logger: Logger,
-        private readonly tokenService: TokenService,
+        @Inject('USER_MODEL') private readonly User: Model<User>,
+        @Inject('PROFILE_MODEL') private readonly Profile: Model<Profile>,
+        @Inject(CACHE_MANAGER) private cacheManager: CacheStore,
+        private readonly mailerService: MailerService,
     ) {}
 
-    async signUp(_signUpDto: SignUpDto): Promise<any> {
+    async signUp(data: ISignUpRequest): Promise<ISignUpResponse> {
+        this.logger.debug('signUp', { props: data });
+
         try {
-            const hashedPassword = await argon.hash(_signUpDto.password);
-
             // Check if user already exists and is active
-            const checkUser = await this.User.findOne({ email: _signUpDto.email });
-            if (checkUser) {
-                if (checkUser.is_active === true) {
-                    throw new ForbiddenException(
-                        'USER_ALREADY_REGISTERED',
-                        'User is already registered. But not activated yet. Please activate your account.',
-                    );
-                } else {
-                    throw new ForbiddenException('USER_ALREADY_REGISTER', 'User already exists');
-                }
-            }
+            const checkUser = await this.User.findOne({
+                email: data.email,
+                domain: data.domain,
+            });
+            if (checkUser) throw new GrpcUnauthenticatedException('USER_ALREADY_REGISTER');
 
-            // Save user to database
-            const newUser = new this.User({
-                email: _signUpDto.email,
-                device: _signUpDto.loginSource,
-                password: hashedPassword,
+            // Save profile user
+            const newProfile = new this.Profile({
+                phone: data.phone,
+                address: data.address,
+                age: data.age,
+                gender: data.gender,
+                avatar: '',
+                name: data.name,
             });
 
-            const user = await newUser.save();
+            await newProfile.save();
+            // Save user to database
+            const newUser = new this.User({
+                email: data.email,
+                password: await argon.hash(data.password),
+                domain: data.domain,
+                role: Role.USER,
+                profile_id: newProfile.id,
+            });
 
-            // Generate, save and update hashed refresh_token
-            const tokens = await this.tokenService.getTokens(user.user_id, _signUpDto.loginSource);
+            await newUser.save();
 
-            this.tokenService.saveToken(
-                tokens.accessToken,
-                tokens.refreshToken,
-                user.user_id,
-                _signUpDto.loginSource,
-                tokens.accessTokenExpiresAt,
-                tokens.refreshTokenExpiresAt,
-            );
+            // if everything is ok, send mail to verify account
+            const otp = generateOtp(6);
+            this.cacheManager.set(`otp:${data.email}/${data.domain}`, otp, { ttl: 300 });
 
-            const new_tokens = await this.tokenService.updateRefreshToken(
-                user.user_id,
-                tokens.refreshToken,
-                true,
-            );
+            await this.mailerService.sendMail({
+                to: data.email,
+                subject: 'OTP verify account',
+                text: `Your OTP is ${otp}`,
+            });
 
-            return { new_tokens };
+            return { result: 'success' };
         } catch (error) {
-            this.logger.error('Error while signing up user', { error });
+            this.logger.error('signUp', { props: error });
             throw error;
         }
     }

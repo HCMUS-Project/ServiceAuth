@@ -2,6 +2,10 @@
 /dist
 /node_modules
 /build
+src/**/*.proto.js
+src/**/*.proto.d.ts
+src/proto_build
+
 
 # Logs
 logs
@@ -11,6 +15,8 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+package-lock.json
+yarn.lock
 
 # OS
 .DS_Store
@@ -54,5 +60,3 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-yarn.lock
-package-lock.json

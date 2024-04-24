@@ -1,14 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { GrpcMethod } from '@nestjs/microservices';
 import { SignUpService } from './sign_up.service';
-import { SignUpDto } from './dto/sign_up.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ISignUpRequest, ISignUpResponse } from './interface/sign_up.interface';
 
-@Controller('')
+@Controller()
 export class SignUpController {
-    constructor(private signUpService: SignUpService) {}
+    constructor(private readonly signUpService: SignUpService) {}
 
-    @Post('sign-up')
-    signUp(@Body() signUpDto: SignUpDto) {
-        return this.signUpService.signUp(signUpDto);
+    @GrpcMethod('SignUpService', 'SignUp')
+    async signUp(data: ISignUpRequest): Promise<ISignUpResponse> {
+        return await this.signUpService.signUp(data);
     }
 }
