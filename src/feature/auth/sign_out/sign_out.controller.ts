@@ -8,7 +8,7 @@ export class SignOutController {
     constructor(private readonly signOutService: SignOutService) {}
 
     @GrpcMethod('SignOutService', 'SignOut')
-    async signUp(data: ISignOutRequest): Promise<ISignOutResponse> {
+    async signOut(data: ISignOutRequest): Promise<ISignOutResponse> {
         return await this.signOutService.signOut(data.user);
     }
 }
