@@ -8,7 +8,7 @@ export class RefreshTokenController {
     constructor(private readonly refreshTokenService: RefreshTokenService) {}
 
     @GrpcMethod('RefreshTokenService', 'RefreshToken')
-    async reFreshToken(data: IRefreshTokenRequest): Promise<IRefreshTokenResponse> {
+    async refreshToken(data: IRefreshTokenRequest): Promise<IRefreshTokenResponse> {
         return await this.refreshTokenService.refreshToken(data.user, data.refreshToken);
     }
 }
