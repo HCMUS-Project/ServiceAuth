@@ -8,7 +8,7 @@ async function bootstrap() {
     // Create a ConfigService instance
     const configService = new ConfigService();
     const port = configService.get<number>('PORT');
-
+    const host = configService.get<string>('AUTH_HOST')
     // Create a microservice instance
     const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
         transport: Transport.GRPC,
@@ -25,7 +25,7 @@ async function bootstrap() {
                 'profile',
             ],
             protoPath: join(__dirname, '../src/proto/main.proto'),
-            url: `0.0.0.0:${port}`,
+            url: `${host}:${port}`,
             loader: {
                 enums: String,
                 objects: true,
