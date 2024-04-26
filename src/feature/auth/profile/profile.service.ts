@@ -24,7 +24,7 @@ export class ProfileService {
 
             const { role, profile_id } = user;
             if (typeof profile_id !== 'string') {
-                const { age, phone, address, gender, name } = profile_id;
+                const { age, phone, address, gender, name, username } = profile_id;
                 return {
                     email,
                     domain,
@@ -34,6 +34,7 @@ export class ProfileService {
                     address,
                     gender,
                     name,
+                    username
                 };
             }
             throw new GrpcInternalException('INTERNAL_ERROR');
@@ -63,8 +64,14 @@ export class ProfileService {
             const updateResult = await this.Profile.updateOne({ _id: user.profile_id }, data);
 
             if (updateResult.modifiedCount === 0) {
-                throw new GrpcInternalException('UPDATE_FAILED');
-            }
+                throw new GrpcInternalException('UPDATE_PROFILE_FAILED');
+            } else {
+                // update user
+                const updateUser = await this.User.updateOne({ _id: user._id }, {username: data['username']});
+
+            if (updateUser.modifiedCount === 0) {
+                throw new GrpcInternalException('UPDATE_USERNAME_USER_FAILED');
+            }}
             return { result: 'success' };
         } catch (error) {
             throw error;

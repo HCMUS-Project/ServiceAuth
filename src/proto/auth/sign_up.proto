@@ -8,15 +8,16 @@ service SignUpService {
 
 message SignUpRequest {
   string email = 1;
-  string password = 2;
-  string domain = 3;
-  string device = 4;
-
-  string phone = 5;
-  string gender = 6;
-  string address = 7;
-  int32 age = 8;
-  string name = 9;
+  string username = 2;
+  string password = 3;
+  string domain = 4;
+  string device = 5;
+  string phone = 6;
+  
+  // string gender = 6;
+  // string address = 7;
+  // int32 age = 8;
+  // string name = 9;
 }
 
 message SignUpResponse {

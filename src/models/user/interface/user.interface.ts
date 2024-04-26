@@ -4,6 +4,7 @@ import { Profile } from './profile.interface';
 
 export interface User extends Document {
     readonly email: string;
+    readonly username: string;
     readonly password: string;
     readonly role: Role;
     readonly domain: string;

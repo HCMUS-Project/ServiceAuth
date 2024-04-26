@@ -16,21 +16,23 @@ message GetProfileRequest {
 message GetProfileResponse {
     string email = 1;
     int32 role = 2;
-    string domain = 3;
-    string phone = 4;
-    string address = 5;
-    string name = 6;
-    string gender = 7;
-    int32 age = 8;
+    string username = 3;
+    string domain = 4;
+    string phone = 5;
+    string address = 6;
+    string name = 7;
+    string gender = 8;
+    int32 age = 9;
 }
 
 message UpdateProfileRequest {
     userToken.User user = 1;
-    optional string phone = 2;
-    optional string address = 3;
-    optional string name = 4;
-    optional string gender = 5;
-    optional int32 age = 6;
+    optional string username = 2;
+    optional string phone = 3;
+    optional string address = 4;
+    optional string name = 5;
+    optional string gender = 6;
+    optional int32 age = 7;
 }
 
 message UpdateProfileResponse {

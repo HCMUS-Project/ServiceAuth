@@ -28,7 +28,7 @@ export class Jwt {
             },
             {
                 secret: this.accessTokenSecret,
-                expiresIn: '15m',
+                expiresIn: '1h',
             },
         );
         return accessToken;
@@ -53,7 +53,7 @@ export class Jwt {
         // Save token to redis
         try {
             this.cacheManager.set(`access_token:${email}/${domain}/${accessToken}`, refreshToken, {
-                ttl: 900,
+                ttl: 3600,
             });
 
             this.cacheManager.set(`refresh_token:${email}/${domain}/${refreshToken}`, accessToken, {

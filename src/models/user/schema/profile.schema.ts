@@ -4,13 +4,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const ProfileUserSchema = new mongoose.Schema<ProfileInterface>(
     {
+        username: {
+            type: String,
+            required: true,
+        },
         phone: {
             type: String,
             required: true,
         },
         gender: {
             type: String,
-            required: true,
+            required: false,
         },
         address: {
             type: String,
@@ -26,7 +30,7 @@ export const ProfileUserSchema = new mongoose.Schema<ProfileInterface>(
         },
         name: {
             type: String,
-            required: true,
+            required: false,
         },
         is_deleted: {
             type: Boolean,

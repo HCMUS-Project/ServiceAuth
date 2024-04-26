@@ -33,18 +33,20 @@ export class SignUpService {
 
             // Save profile user
             const newProfile = new this.Profile({
+                username: data.username,
                 phone: data.phone,
-                address: data.address,
-                age: data.age,
-                gender: data.gender,
+                address: "",
+                age: -1,
+                gender: "",
                 avatar: '',
-                name: data.name,
+                name: "",
             });
 
             await newProfile.save();
             // Save user to database
             const newUser = new this.User({
                 email: data.email,
+                username: data.username,
                 password: await argon.hash(data.password),
                 domain: data.domain,
                 role: Role.USER,
