@@ -9,6 +9,7 @@ export class RefreshTokenController {
 
     @GrpcMethod('RefreshTokenService', 'RefreshToken')
     async refreshToken(data: IRefreshTokenRequest): Promise<IRefreshTokenResponse> {
+        // console.log(data)
         return await this.refreshTokenService.refreshToken(data.user, data.refreshToken);
     }
 }

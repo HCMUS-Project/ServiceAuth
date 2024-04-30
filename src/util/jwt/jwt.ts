@@ -20,6 +20,7 @@ export class Jwt {
     }
 
     async createAccessToken(email: string, domain: String, role: Role): Promise<string> {
+        // console.log(role)
         const accessToken = await this.jwtService.signAsync(
             {
                 domain,
@@ -59,6 +60,7 @@ export class Jwt {
             this.cacheManager.set(`refresh_token:${email}/${domain}/${refreshToken}`, accessToken, {
                 ttl: 86400,
             });
+
         } catch (error) {
             throw error;
         }
@@ -72,6 +74,15 @@ export class Jwt {
             return decoded;
         } catch (error) {
             throw new GrpcUnauthenticatedException('TOKEN_VALIDATION_FAILED');
+        }
+    }
+
+    async deleteToken(email: string, domain: string, accessToken: string, refreshToken: string){
+        try{
+            this.cacheManager.del(`access_token:${email}/${domain}/${accessToken}`);
+            this.cacheManager.del(`refresh_token:${email}/${domain}/${refreshToken}`);
+        }catch (error) {
+            throw error;
         }
     }
 }
