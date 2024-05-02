@@ -15,7 +15,7 @@ async function bootstrap() {
         bufferLogs: true,
         options: {
             package: [
-                'main',
+                'auth',
                 'signUp',
                 'verifyAccount',
                 'signIn',

@@ -35,11 +35,11 @@ export class SignUpService {
             const newProfile = new this.Profile({
                 username: data.username,
                 phone: data.phone,
-                address: "",
-                age: -1,
-                gender: "",
-                avatar: '',
-                name: "",
+                address: "123 abc, phuong X, quan Y, thanh pho Z",
+                age: 18,
+                gender: "other",
+                avatar: 'none',
+                name: "Nguyen Van A",
             });
 
             await newProfile.save();
