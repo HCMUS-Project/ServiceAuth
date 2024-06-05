@@ -1,9 +1,12 @@
 syntax = "proto3";
 
+import "auth/user_token.proto";
+
 package signIn;
 
 service SignInService {
   rpc SignIn (SignInRequest) returns (SignInResponse);
+  rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse);
 }
 
 message SignInRequest {
@@ -15,4 +18,14 @@ message SignInRequest {
 message SignInResponse {
     string access_token = 1;
     string refresh_token = 2;
+}
+
+message ChangePasswordRequest {
+  userToken.User user = 1;
+  string password = 2;
+  string new_password = 3;
+}
+
+message ChangePasswordResponse {
+  string message = 1;
 }

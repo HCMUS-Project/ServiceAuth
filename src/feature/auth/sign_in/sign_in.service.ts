@@ -5,7 +5,7 @@ import { User } from 'src/models/user/interface/user.interface';
 import { GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
 import * as argon from 'argon2';
 import { Jwt } from 'src/util/jwt/jwt';
-import { ISignInRequest, ISignInResponse } from './interface/sign_in.interface';
+import { IChangePasswordRequest, IChangePasswordResponse, ISignInRequest, ISignInResponse } from './interface/sign_in.interface';
 
 @Injectable()
 export class SignInService {
@@ -50,6 +50,40 @@ export class SignInService {
 
             return { accessToken, refreshToken };
         } catch (error) {
+            throw error;
+        }
+    }
+
+    async changePassword(data: IChangePasswordRequest): Promise<IChangePasswordResponse> {
+        try{
+            // Check if user already exists and is active
+            const checkUser = await this.User.findOne({
+                email: data.user.email,
+                domain: data.user.domain,
+            });
+
+            if (!checkUser) throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
+            if (!checkUser.is_active) throw new GrpcUnauthenticatedException('USER_NOT_VERIFIED');
+
+            // Check password
+            const isPasswordMatch = await argon.verify(checkUser.password, data.password);
+            if (!isPasswordMatch) {
+                this.logger.error('Invalid password for user: ' + checkUser.email);
+                throw new GrpcUnauthenticatedException('INVALID_PASSWORD');
+            }
+
+            // Hash the new password
+            const hashedPassword = await argon.hash(data.newPassword);
+
+            // Update the password
+            const updatedUser = await this.User.updateOne(
+                { email: data.user.email, domain: data.user.domain },
+                { password: hashedPassword },
+            );
+
+            return { message: 'Password changed successfully' };
+        }
+        catch (error) {
             throw error;
         }
     }
