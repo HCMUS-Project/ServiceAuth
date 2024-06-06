@@ -14,10 +14,11 @@ message SignUpRequest {
   string device = 5;
   string phone = 6;
   
-  // string gender = 6;
-  // string address = 7;
-  // int32 age = 8;
-  // string name = 9;
+  optional string role = 7;
+  // string gender = 8;
+  // string address = 9;
+  // int32 age = 10;
+  // string name = 11;
 }
 
 message SignUpResponse {

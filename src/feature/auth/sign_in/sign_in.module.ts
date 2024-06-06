@@ -6,6 +6,7 @@ import { UserSchema } from 'src/models/user/schema/user.schema';
 import { Jwt } from 'src/util/jwt/jwt';
 import { SignInController } from './sign_in.controller';
 import { SignInService } from './sign_in.service';
+import { TenantSchema } from 'src/models/tenant/schema/user.schema';
 
 @Module({
     imports: [
@@ -24,6 +25,11 @@ import { SignInService } from './sign_in.service';
         {
             provide: 'USER_MODEL',
             useFactory: (mongoose: Mongoose) => mongoose.model('user', UserSchema),
+            inject: ['DATABASE_CONNECTION'],
+        },
+        {
+            provide: 'TENANT_MODEL',
+            useFactory: (mongoose: Mongoose) => mongoose.model('tenant', TenantSchema),
             inject: ['DATABASE_CONNECTION'],
         },
     ],
