@@ -7,6 +7,7 @@ package profile;
 service ProfileService {
     rpc GetProfile (GetProfileRequest) returns (GetProfileResponse);
     rpc UpdateProfile (UpdateProfileRequest) returns (UpdateProfileResponse);
+    rpc GetTenantProfile (GetTenantProfileRequest) returns (GetTenantProfileResponse);
 }
 
 message GetProfileRequest {
@@ -25,6 +26,30 @@ message GetProfileResponse {
     int32 age = 9;
 }
 
+
+message TenantProfile {
+    string username = 1;
+    string email = 2;
+    string phone = 3;
+    string gender = 4;
+    string address = 5;
+    int32 age = 6;
+    string avatar = 7;
+    string name = 8;
+    string stage = 9;
+    string created_at = 10;
+    string is_verify = 11;
+}
+
+
+message GetTenantProfileRequest {
+    userToken.User user = 1;
+}
+
+message GetTenantProfileResponse {
+    TenantProfile tenantprofile = 1;
+}
+
 message UpdateProfileRequest {
     userToken.User user = 1;
     optional string username = 2;
@@ -37,4 +62,19 @@ message UpdateProfileRequest {
 
 message UpdateProfileResponse {
     string result = 1;
+}
+
+message UpdateTenantProfileRequest {
+    userToken.User user = 1;
+    optional string username = 2;
+    optional string phone = 3;
+    optional string gender = 4;
+    optional string address = 5;
+    optional int32 age = 6;
+    optional string avatar = 7;
+    optional string name = 8;
+}
+
+message UpdateTenantProfileResponse {
+    TenantProfile tenantprofile = 1;
 }
