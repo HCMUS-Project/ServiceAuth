@@ -12,6 +12,7 @@ import { ISignUpRequest, ISignUpResponse } from './interface/sign_up.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 import { generateOtp } from 'src/common/otp/otp';
 import { CACHE_MANAGER, CacheStore } from '@nestjs/cache-manager';
+import { getEnumKeyByEnumValue } from 'src/util/convert_enum/get_key_enum';
 
 export class SignUpService {
     constructor(
@@ -26,10 +27,12 @@ export class SignUpService {
 
     async signUp(data: ISignUpRequest): Promise<ISignUpResponse> {
         this.logger.debug('signUp', { props: data });
-        
 
         try {
-            if ( data.role === undefined || data.role === String(Role.USER)) {
+            if (
+                data.role === undefined ||
+                data.role.toString() === getEnumKeyByEnumValue(Role, Role.USER)
+            ) {
                 // Check if user already exists and is active
                 const checkUser = await this.User.findOne({
                     email: data.email,
@@ -41,11 +44,11 @@ export class SignUpService {
                 const newProfile = new this.Profile({
                     username: data.username,
                     phone: data.phone,
-                    address: "123 abc, phuong X, quan Y, thanh pho Z",
+                    address: '123 abc, phuong X, quan Y, thanh pho Z',
                     age: 18,
-                    gender: "other",
+                    gender: 'other',
                     avatar: 'none',
-                    name: "Nguyen Van A",
+                    name: 'Nguyen Van A',
                 });
 
                 await newProfile.save();
@@ -72,8 +75,7 @@ export class SignUpService {
                 });
 
                 return { result: 'success' };
-            }
-            else {
+            } else {
                 // Check if user already exists and is active
                 const checkUser = await this.Tenant.findOne({
                     email: data.email,
@@ -87,11 +89,11 @@ export class SignUpService {
                     username: data.username,
                     email: data.email,
                     phone: data.phone,
-                    address: "123 abc, phuong X, quan Y, thanh pho Z",
+                    address: '123 abc, phuong X, quan Y, thanh pho Z',
                     age: 18,
-                    gender: "unknown",
+                    gender: 'unknown',
                     avatar: 'none',
-                    name: "Nguyen Van A",
+                    name: 'Nguyen Van A',
                 });
 
                 await newProfile.save();

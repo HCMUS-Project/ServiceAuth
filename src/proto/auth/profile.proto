@@ -8,6 +8,7 @@ service ProfileService {
     rpc GetProfile (GetProfileRequest) returns (GetProfileResponse);
     rpc UpdateProfile (UpdateProfileRequest) returns (UpdateProfileResponse);
     rpc GetTenantProfile (GetTenantProfileRequest) returns (GetTenantProfileResponse);
+    rpc UpdateTenantProfile (UpdateTenantProfileRequest) returns (UpdateTenantProfileResponse);
 }
 
 message GetProfileRequest {

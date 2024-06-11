@@ -49,7 +49,7 @@ export class ProfileService {
 
     async getTenantProfile(email: string, domain: string): Promise<IGetTenantProfileResponse> {
         try {
-            console.log(email, domain);
+            // console.log(email, domain);
             // check if user exists
             const tenantprofile = await this.TenantProfile.findOne({ email, domain, is_verify: true });
 

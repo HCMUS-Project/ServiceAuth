@@ -1,12 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import Logger, { LoggerKey } from 'src/core/logger/interfaces/logger.interface';
-import { Model } from 'mongoose';
+import { Document, FilterQuery, Model } from 'mongoose';
 import { User } from 'src/models/user/interface/user.interface';
 import { Tenant } from 'src/models/tenant/interface/user.interface';
 import { GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
 import * as argon from 'argon2';
 import { Jwt } from 'src/util/jwt/jwt';
-import { IChangePasswordRequest, IChangePasswordResponse, ISignInRequest, ISignInResponse } from './interface/sign_in.interface';
+import { IAccountForGenerateToken, IChangePasswordRequest, IChangePasswordResponse, ISignInRequest, ISignInResponse } from './interface/sign_in.interface';
+import {getEnumKeyByEnumValue} from 'src/util/convert_enum/get_key_enum';
+import {Role} from 'src/common/enums/role.enum';
 
 @Injectable()
 export class SignInService {
@@ -17,74 +19,57 @@ export class SignInService {
         private readonly jwtService: Jwt,
     ) {}
 
+    private async authenticateUser(data: ISignInRequest): Promise<ISignInResponse> {
+        const user = await this.User.findOne({
+            email: data.email,
+            domain: data.domain,
+        });
+
+        if (!user) throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
+        if (!user.is_active) throw new GrpcUnauthenticatedException('USER_NOT_ACTIVE');
+
+        await this.verifyPassword(user.password, data.password, 'user', user.email);
+        return this.generateAndSaveTokens(user);
+    }
+
+    private async authenticateTenant(data: ISignInRequest): Promise<ISignInResponse> {
+        const tenant = await this.Tenant.findOne({
+            email: data.email,
+            domain: data.domain,
+        });
+
+        if (!tenant) throw new GrpcUnauthenticatedException('TENANT_NOT_FOUND');
+        if (!tenant.is_active) throw new GrpcUnauthenticatedException('TENANT_NOT_ACTIVED');
+        if (!tenant.is_verified) throw new GrpcUnauthenticatedException('TENANT_NOT_VERIFIED');
+
+        await this.verifyPassword(tenant.password, data.password, 'tenant', tenant.email);
+        return this.generateAndSaveTokens(tenant);
+    }
+
+    private async verifyPassword(storedPassword: string, submittedPassword: string, role: string, email: string): Promise<void> {
+        const isPasswordMatch = await argon.verify(storedPassword, submittedPassword);
+        if (!isPasswordMatch) {
+            this.logger.error(`Invalid password for ${role}: ${email}`);
+            throw new GrpcUnauthenticatedException('INVALID_PASSWORD');
+        }
+    }
+
+    private async generateAndSaveTokens(account: IAccountForGenerateToken): Promise<ISignInResponse> {
+        const accessToken = await this.jwtService.createAccessToken(account.email, account.domain, account.role);
+        const refreshToken = await this.jwtService.createRefreshToken(account.email, account.domain, account.role);
+        this.jwtService.saveToken(account.email, account.domain, accessToken, refreshToken);
+        return { accessToken, refreshToken };
+    }
+
+
     async signIn(data: ISignInRequest): Promise<ISignInResponse> {
         try {
-            if (data.role === undefined){
-                // Check if user already exists and is active
-                const checkUser = await this.User.findOne({
-                    email: data.email,
-                    domain: data.domain,
-                });
-
-                if (!checkUser) throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
-                if (!checkUser.is_active) throw new GrpcUnauthenticatedException('USER_NOT_VERIFIED');
-
-                // Check password
-                const isPasswordMatch = await argon.verify(checkUser.password, data.password);
-                if (!isPasswordMatch) {
-                    this.logger.error('Invalid password for user: ' + checkUser.email);
-                    throw new GrpcUnauthenticatedException('INVALID_PASSWORD');
-                }
-
-                // Generate access token and refresh token
-                const accessToken = await this.jwtService.createAccessToken(
-                    checkUser.email,
-                    checkUser.domain,
-                    checkUser.role,
-                );
-                const refreshToken = await this.jwtService.createRefreshToken(
-                    checkUser.email,
-                    checkUser.domain,
-                    checkUser.role,
-                );
-
-                // Save token to cache
-                this.jwtService.saveToken(checkUser.email, checkUser.domain, accessToken, refreshToken);
-
-                return { accessToken, refreshToken };
+            if (data.role === undefined || data.role.toString() === getEnumKeyByEnumValue(Role, Role.USER)){
+                return this.authenticateUser(data)
             }
             else{
-                const checkUser = await this.Tenant.findOne({
-                    email: data.email,
-                    domain: data.domain,
-                });
-    
-                if (!checkUser) throw new GrpcUnauthenticatedException('TENANT_NOT_FOUND');
-                if (!checkUser.is_active) throw new GrpcUnauthenticatedException('TENANT_NOT_ACTIVED');
-                if (!checkUser.is_verified) throw new GrpcUnauthenticatedException('TENANT_NOT_VERIFIED');
-                // Check password
-                const isPasswordMatch = await argon.verify(checkUser.password, data.password);
-                if (!isPasswordMatch) {
-                    this.logger.error('Invalid password for tenant: ' + checkUser.email);
-                    throw new GrpcUnauthenticatedException('INVALID_PASSWORD');
-                }
-    
-                // Generate access token and refresh token
-                const accessToken = await this.jwtService.createAccessToken(
-                    checkUser.email,
-                    checkUser.domain,
-                    checkUser.role,
-                );
-                const refreshToken = await this.jwtService.createRefreshToken(
-                    checkUser.email,
-                    checkUser.domain,
-                    checkUser.role,
-                );
-    
-                // Save token to cache
-                this.jwtService.saveToken(checkUser.email, checkUser.domain, accessToken, refreshToken);
-    
-                return { accessToken, refreshToken };
+
+                return this.authenticateTenant(data)
             }
             
         } catch (error) {
@@ -92,34 +77,53 @@ export class SignInService {
         }
     }
 
+    private async updatePassword<T extends Document>(model: Model<T>,accountId: T['_id'], newPassword: string): Promise<void> {
+        const hashedPassword = await argon.hash(newPassword);
+        const newAccount = await model.updateOne(
+            { _id: accountId } as FilterQuery<T>,
+            {$set:{ password: hashedPassword }}
+        );
+    }
+
+    async changeUserPassword(data: IChangePasswordRequest): Promise<IChangePasswordResponse> {
+        const user = await this.User.findOne({
+            email: data.user.email,
+            domain: data.user.domain,
+        });
+
+        if (!user) throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
+        if (!user.is_active) throw new GrpcUnauthenticatedException('USER_NOT_ACTIVE');
+
+        await this.verifyPassword(user.password, data.password, 'user', user.email);
+        await this.updatePassword(this.User, user.id, data.newPassword);
+
+        return { result: 'User password changed successfully' };
+    }
+
+    async changeTenantPassword(data: IChangePasswordRequest): Promise<IChangePasswordResponse> {
+        const tenant = await this.Tenant.findOne({
+            email: data.user.email,
+            domain: data.user.domain,
+        });
+
+        if (!tenant) throw new GrpcUnauthenticatedException('TENANT_NOT_FOUND');
+        if (!tenant.is_active) throw new GrpcUnauthenticatedException('TENANT_NOT_ACTIVED');
+        if (!tenant.is_verified) throw new GrpcUnauthenticatedException('TENANT_NOT_VERIFIED');
+        
+        await this.verifyPassword(tenant.password, data.password, 'tenant', tenant.email);
+        await this.updatePassword(this.Tenant, tenant.id, data.newPassword);
+
+        return { result: 'Tenant password changed successfully' };
+    }
+
     async changePassword(data: IChangePasswordRequest): Promise<IChangePasswordResponse> {
         try{
-            // Check if user already exists and is active
-            const checkUser = await this.User.findOne({
-                email: data.user.email,
-                domain: data.user.domain,
-            });
-
-            if (!checkUser) throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
-            if (!checkUser.is_active) throw new GrpcUnauthenticatedException('USER_NOT_VERIFIED');
-
-            // Check password
-            const isPasswordMatch = await argon.verify(checkUser.password, data.password);
-            if (!isPasswordMatch) {
-                this.logger.error('Invalid password for user: ' + checkUser.email);
-                throw new GrpcUnauthenticatedException('INVALID_PASSWORD');
+            if (data.user.role === undefined || data.user.role.toString() === getEnumKeyByEnumValue(Role, Role.USER)){
+                return this.changeUserPassword(data)
+            } else {
+                return this.changeTenantPassword(data)
             }
 
-            // Hash the new password
-            const hashedPassword = await argon.hash(data.newPassword);
-
-            // Update the password
-            const updatedUser = await this.User.updateOne(
-                { email: data.user.email, domain: data.user.domain },
-                { password: hashedPassword },
-            );
-
-            return { message: 'Password changed successfully' };
         }
         catch (error) {
             throw error;

@@ -12,6 +12,10 @@ import {
     IVerifyAccountRequest,
     IVerifyAccountResponse,
 } from './interface/verify_account.interface';
+import { Tenant } from 'src/models/tenant/interface/user.interface';
+import { getEnumKeyByEnumValue } from 'src/util/convert_enum/get_key_enum';
+import { Role } from 'src/common/enums/role.enum';
+import { AccountType } from 'src/common/enums/accountType.enum';
 
 @Injectable()
 export class VerifyAccountService {
@@ -19,72 +23,119 @@ export class VerifyAccountService {
         private readonly mailerService: MailerService,
         @Inject(LoggerKey) private logger: Logger,
         @Inject('USER_MODEL') private readonly User: Model<User>,
+        @Inject('TENANT_MODEL') private readonly Tenant: Model<Tenant>,
         @Inject(CACHE_MANAGER) private cacheManager: CacheStore,
     ) {}
 
-    async verifyAccount(data: IVerifyAccountRequest): Promise<IVerifyAccountResponse> {
-        try {
-            // Check if the user exists
-            let user = await this.User.findOne({
+    private getModel(accountType: AccountType): Model<User | Tenant> {
+        switch (accountType) {
+            case AccountType.User:
+                return this.User;
+            case AccountType.Tenant:
+                return this.Tenant;
+            default:
+                throw new GrpcUnauthenticatedException('INVALID_ACCOUNT_TYPE');
+        }
+    }
+
+    async verifyAccountType(data: IVerifyAccountRequest, accountType: AccountType) {
+        const model = this.getModel(accountType);
+
+        // Check if the account exists
+        let account = await model.findOne({
+            email: data.email,
+            domain: data.domain,
+        });
+
+        if (!account) {
+            throw new GrpcUnauthenticatedException(`${accountType.toUpperCase()}_NOT_FOUND`);
+        }
+
+        if (account.is_active) {
+            throw new GrpcUnauthenticatedException(`${accountType.toUpperCase()}_ALREADY_VERIFIED`);
+        }
+
+        // Check OTP
+        const otp = await this.cacheManager.get(`otp:${data.email}/${data.domain}`);
+
+        if (!otp) throw new GrpcUnauthenticatedException('OTP_EXPIRED');
+        if (otp !== data.otp) throw new GrpcUnauthenticatedException('OTP_INVALID');
+
+        // Update account
+        await model.updateOne(
+            {
                 email: data.email,
                 domain: data.domain,
-            });
-            if (!user) {
-                throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
+            },
+            {
+                is_active: true,
+            },
+        );
+
+        return { result: 'success' };
+    }
+
+    async verifyAccount(data: IVerifyAccountRequest): Promise<IVerifyAccountResponse> {
+        try {
+            let accountType: AccountType;
+            if (
+                data.role === undefined ||
+                data.role.toString() === getEnumKeyByEnumValue(Role, Role.USER)
+            ) {
+                accountType = AccountType.User;
+            } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.TENANT)) {
+                accountType = AccountType.Tenant;
             }
-            if (user.is_active) {
-                throw new GrpcUnauthenticatedException('USER_ALREADY_VERIFIED');
-            }
 
-            // Check OTP
-            const otp = await this.cacheManager.get(`otp:${data.email}/${data.domain}`);
-
-            if (!otp) throw new GrpcUnauthenticatedException('OTP_EXPIRED');
-            if (otp !== data.otp) throw new GrpcUnauthenticatedException('OTP_INVALID');
-
-            // Update user
-            await this.User.updateOne(
-                {
-                    email: data.email,
-                    domain: data.domain,
-                },
-                {
-                    is_active: true,
-                },
-            );
-
-            return { result: 'success' };
+            return this.verifyAccountType(data, accountType);
         } catch (error) {
             throw error;
         }
     }
 
+    async sendMailOtpType(data: ISendMailRequest, accountType: AccountType) {
+        const model = this.getModel(accountType);
+        // Check if the account exists
+        let account = await model.findOne({
+            email: data.email,
+            domain: data.domain,
+        });
+
+        if (!account) {
+            throw new GrpcUnauthenticatedException(`${accountType.toUpperCase()}_NOT_FOUND`);
+        }
+
+        if (account.is_active) {
+            throw new GrpcUnauthenticatedException(`${accountType.toUpperCase()}_ALREADY_VERIFIED`);
+        }
+
+        // Generate OTP
+        const otp = generateOtp(6);
+        this.cacheManager.set(`otp:${data.email}/${data.domain}`, otp, { ttl: 300 });
+
+        // Send OTP to account
+        await this.mailerService.sendMail({
+            to: data.email,
+            subject: 'OTP verify account',
+            text: `Your OTP is: ${otp}`,
+        });
+
+        return { result: 'success' };
+    }
+
     async sendMailOtp(data: ISendMailRequest): Promise<ISendMailResponse> {
         try {
-            // Check if the user exists
-            let user = await this.User.findOne({
-                email: data.email,
-                domain: data.domain,
-            });
-            if (!user) {
-                throw new GrpcUnauthenticatedException('USER_NOT_FOUND');
-            }
-            if (user.is_active) {
-                throw new GrpcUnauthenticatedException('USER_ALREADY_VERIFIED');
+            let accountType: AccountType;
+            if (
+                data.role === undefined ||
+                data.role.toString() === getEnumKeyByEnumValue(Role, Role.USER)
+            ) {
+                accountType = AccountType.User;
+            } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.TENANT)) {
+                accountType = AccountType.Tenant;
             }
 
-            // Generate OTP
-            const otp = generateOtp(6);
-            this.cacheManager.set(`otp:${data.email}/${data.domain}`, otp, { ttl: 300 });
-
-            // Send OTP to user
-            await this.mailerService.sendMail({
-                to: data.email,
-                subject: 'OTP verify account',
-                text: `Your OTP is: ${otp}`,
-            });
-
-            return { result: 'success' };
+            return this.sendMailOtpType(data, accountType);
         } catch (error) {
             throw error;
         }
