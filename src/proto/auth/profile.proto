@@ -38,8 +38,11 @@ message TenantProfile {
     string avatar = 7;
     string name = 8;
     string stage = 9;
-    string created_at = 10;
-    string is_verify = 11;
+    string company_name = 10;
+    string company_address = 11;
+    string created_at = 12;
+    string is_verify = 13;
+    string domain = 14;
 }
 
 
@@ -74,6 +77,9 @@ message UpdateTenantProfileRequest {
     optional int32 age = 6;
     optional string avatar = 7;
     optional string name = 8;
+    optional string company_name = 9;
+    optional string company_address = 10;
+    optional string domain = 11;
 }
 
 message UpdateTenantProfileResponse {

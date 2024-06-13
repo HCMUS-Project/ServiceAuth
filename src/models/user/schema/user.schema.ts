@@ -26,7 +26,7 @@ export const UserSchema = new mongoose.Schema<UserInterface>(
         },
         domain: {
             type: String,
-            required: true,
+            required: false,
             // unique: true,
         },
         is_deleted: {

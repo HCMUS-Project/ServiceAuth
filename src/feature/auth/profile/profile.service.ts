@@ -18,6 +18,7 @@ export class ProfileService {
 
     async getProfile(email: string, domain: string): Promise<IGetProfileResponse> {
         try {
+            if (domain == undefined) throw new GrpcUnauthenticatedException('DOMAIN_IS_UNDEFINED');
             // check if user exists
             const user = await this.User.findOne({ email, domain, is_deleted: false }).populate(
                 'profile_id',
@@ -47,11 +48,11 @@ export class ProfileService {
         }
     }
 
-    async getTenantProfile(email: string, domain: string): Promise<IGetTenantProfileResponse> {
+    async getTenantProfile(email: string): Promise<IGetTenantProfileResponse> {
         try {
             // console.log(email, domain);
             // check if user exists
-            const tenantprofile = await this.TenantProfile.findOne({ email, domain, is_verify: true });
+            const tenantprofile = await this.TenantProfile.findOne({ email,is_verify: true });
 
             if (!tenantprofile) throw new GrpcUnauthenticatedException('TENANT_PROFILE_NOT_FOUND');
             if (!tenantprofile.is_verify) throw new GrpcUnauthenticatedException('TENANT_NOT_VERIFIED');
@@ -68,8 +69,11 @@ export class ProfileService {
                     avatar: tenantprofile.avatar,
                     name: tenantprofile.name,
                     stage: tenantprofile.stage,
+                    companyName: tenantprofile.companyName,
+                    companyAddress: tenantprofile.companyAddress,
+                    domain: tenantprofile.domain,
                     isVerify: String(tenantprofile.is_verify),
-                    createdAt: String(tenantprofile.createAt),
+                    createdAt: String(tenantprofile.createdAt),
                 },
             };
 
@@ -87,6 +91,7 @@ export class ProfileService {
         data: object,
     ): Promise<IUpdateProfileResponse> {
         try {
+            if (domain == undefined) throw new GrpcUnauthenticatedException('DOMAIN_IS_UNDEFINED');
             // check if user exists
             const user = await this.User.findOne({ email, domain, is_deleted: false });
 
@@ -152,8 +157,11 @@ export class ProfileService {
                     avatar: updatedTenantProfile.avatar,
                     name: updatedTenantProfile.name,
                     stage: updatedTenantProfile.stage,
+                    companyName: updatedTenantProfile.companyName,
+                    companyAddress: updatedTenantProfile.companyAddress,
+                    domain: updatedTenantProfile.domain,
                     isVerify: String(updatedTenantProfile.is_verify),
-                    createdAt: String(updatedTenantProfile.createAt),
+                    createdAt: String(updatedTenantProfile.createdAt),
                 },
             };
         }   

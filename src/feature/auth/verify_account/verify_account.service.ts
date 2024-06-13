@@ -30,6 +30,7 @@ export class VerifyAccountService {
     private getModel(accountType: AccountType): Model<User | Tenant> {
         switch (accountType) {
             case AccountType.User:
+            case AccountType.Admin:
                 return this.User;
             case AccountType.Tenant:
                 return this.Tenant;
@@ -40,6 +41,15 @@ export class VerifyAccountService {
 
     async verifyAccountType(data: IVerifyAccountRequest, accountType: AccountType) {
         const model = this.getModel(accountType);
+
+        // If Admin or Tenant, domain is "", cause new account Tenant dont have domain
+        if (accountType === 'Admin' || accountType === 'Tenant') {
+            data.domain = '';
+        } else if (accountType === 'User') {
+            // Check if User, domain must have value
+            if (data.domain == undefined)
+                throw new GrpcUnauthenticatedException('DOMAIN_IS_UNDEFINED');
+        }
 
         // Check if the account exists
         let account = await model.findOne({
@@ -85,8 +95,10 @@ export class VerifyAccountService {
                 accountType = AccountType.User;
             } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.TENANT)) {
                 accountType = AccountType.Tenant;
+            } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.ADMIN)) {
+                accountType = AccountType.Admin;
             }
-
+            console.log(accountType);
             return this.verifyAccountType(data, accountType);
         } catch (error) {
             throw error;
@@ -95,6 +107,16 @@ export class VerifyAccountService {
 
     async sendMailOtpType(data: ISendMailRequest, accountType: AccountType) {
         const model = this.getModel(accountType);
+
+        // If Admin or Tenant, domain is "", cause new account Tenant dont have domain
+        if (accountType === 'Admin' || accountType === 'Tenant') {
+            data.domain = '';
+        } else if (accountType === 'User') {
+            // Check if User, domain must have value
+            if (data.domain == undefined)
+                throw new GrpcUnauthenticatedException('DOMAIN_IS_UNDEFINED');
+        }
+
         // Check if the account exists
         let account = await model.findOne({
             email: data.email,
@@ -133,6 +155,8 @@ export class VerifyAccountService {
                 accountType = AccountType.User;
             } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.TENANT)) {
                 accountType = AccountType.Tenant;
+            } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.ADMIN)) {
+                accountType = AccountType.Admin;
             }
 
             return this.sendMailOtpType(data, accountType);

@@ -33,6 +33,8 @@ export class SignUpService {
                 data.role === undefined ||
                 data.role.toString() === getEnumKeyByEnumValue(Role, Role.USER)
             ) {
+                if (data.domain == undefined)
+                    throw new GrpcUnauthenticatedException('DOMAIN_IS_UNDEFINED');
                 // Check if user already exists and is active
                 const checkUser = await this.User.findOne({
                     email: data.email,
@@ -75,20 +77,22 @@ export class SignUpService {
                 });
 
                 return { result: 'success' };
-            } else {
-                // Check if user already exists and is active
-                const checkUser = await this.Tenant.findOne({
+            } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.TENANT)) {
+                data.domain = ""
+                // Check if tenant already exists and is active
+                const checkTenant = await this.Tenant.findOne({
                     email: data.email,
-                    domain: data.domain,
                 });
-                if (checkUser) throw new GrpcUnauthenticatedException('TENANT_ALREADY_REGISTER');
+                if (checkTenant) throw new GrpcUnauthenticatedException('TENANT_ALREADY_REGISTER');
 
-                // Save profile user
-                const newProfile = new this.TenantProfile({
+                // Save profile tenant
+                const newTenantProfile = new this.TenantProfile({
                     domain: data.domain,
                     username: data.username,
                     email: data.email,
                     phone: data.phone,
+                    companyName: data.companyName,
+                    companyAddress: data.companyAddress,
                     address: '123 abc, phuong X, quan Y, thanh pho Z',
                     age: 18,
                     gender: 'unknown',
@@ -96,14 +100,57 @@ export class SignUpService {
                     name: 'Nguyen Van A',
                 });
 
-                await newProfile.save();
-                // Save user to database
-                const newUser = new this.Tenant({
+                await newTenantProfile.save();
+                // Save tenant to database
+                const newTenant = new this.Tenant({
                     email: data.email,
                     username: data.username,
                     password: await argon.hash(data.password),
                     domain: data.domain,
                     role: Role.TENANT,
+                    profile_id: newTenantProfile.id,
+                });
+
+                await newTenant.save();
+
+                // if everything is ok, send mail to verify account
+                const otp = generateOtp(6);
+                this.cacheManager.set(`otp:${data.email}/${data.domain}`, otp, { ttl: 300 });
+
+                await this.mailerService.sendMail({
+                    to: data.email,
+                    subject: 'OTP verify account',
+                    text: `Your OTP is ${otp}`,
+                });
+
+                return { result: 'success' };
+            } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.ADMIN)) {
+                data.domain = ""
+                // Check if user already exists and is active
+                const checkUser = await this.User.findOne({
+                    email: data.email,
+                });
+                if (checkUser) throw new GrpcUnauthenticatedException('ADMIN_ALREADY_REGISTER');
+
+                // Save profile user
+                const newProfile = new this.Profile({
+                    username: data.username,
+                    phone: data.phone,
+                    address: '123 abc, phuong X, quan Y, thanh pho Z',
+                    age: 18,
+                    gender: 'other',
+                    avatar: 'none',
+                    name: 'Nguyen Van A',
+                });
+
+                await newProfile.save();
+                // Save user to database
+                const newUser = new this.User({
+                    email: data.email,
+                    username: data.username,
+                    password: await argon.hash(data.password),
+                    domain: data.domain,
+                    role: Role.USER,
                     profile_id: newProfile.id,
                 });
 

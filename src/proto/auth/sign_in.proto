@@ -12,7 +12,7 @@ service SignInService {
 message SignInRequest {
   string email = 1;
   string password = 2;
-  string domain = 3;
+  optional string domain = 3;
   optional userToken.Role role = 4;
 }
 

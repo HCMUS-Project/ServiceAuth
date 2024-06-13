@@ -22,7 +22,7 @@ export class ProfileController {
 
     @GrpcMethod('ProfileService', 'GetTenantProfile')
     async getTenantProfile(data: IGetProfileRequest): Promise<IGetTenantProfileResponse> {
-        return await this.profileService.getTenantProfile(data.user.email, data.user.domain);
+        return await this.profileService.getTenantProfile(data.user.email);
     }
 
     @GrpcMethod('ProfileService', 'UpdateProfile')
@@ -33,7 +33,7 @@ export class ProfileController {
 
     @GrpcMethod('ProfileService', 'UpdateTenantProfile')
     async updateTenant(data: IUpdateTenantProfileRequest): Promise<IUpdateTenantProfileResponse> {
-        console.log(data)
+        // console.log(data)
         return await this.profileService.updateTenantProfile(data);
     }
 }

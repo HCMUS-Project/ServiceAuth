@@ -26,7 +26,7 @@ export const TenantSchema = new mongoose.Schema<TenantInterface>(
         },
         domain: {
             type: String,
-            required: true,
+            required: false,
             // unique: true,
         },
         is_deleted: {
