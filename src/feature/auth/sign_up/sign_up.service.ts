@@ -150,7 +150,7 @@ export class SignUpService {
                     username: data.username,
                     password: await argon.hash(data.password),
                     domain: data.domain,
-                    role: Role.USER,
+                    role: Role.ADMIN,
                     profile_id: newProfile.id,
                 });
 
