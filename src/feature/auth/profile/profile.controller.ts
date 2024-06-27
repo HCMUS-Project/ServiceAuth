@@ -2,6 +2,8 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { ProfileService } from './profile.service';
 import {
+    IGetAllUserProfileRequest,
+    IGetAllUserProfileResponse,
     IGetProfileRequest,
     IGetProfileResponse,
     IGetTenantProfileResponse,
@@ -31,9 +33,9 @@ export class ProfileController {
         return await this.profileService.updateProfile(user.email, user.domain, dataUpdate);
     }
 
-    @GrpcMethod('ProfileService', 'UpdateTenantProfile')
-    async updateTenant(data: IUpdateTenantProfileRequest): Promise<IUpdateTenantProfileResponse> {
+    @GrpcMethod('ProfileService', 'GetAllUserProfile')
+    async getAllUserProfile(data: IGetAllUserProfileRequest): Promise<IGetAllUserProfileResponse> {
         // console.log(data)
-        return await this.profileService.updateTenantProfile(data);
+        return await this.profileService.getAllUserProfile(data);
     }
 }

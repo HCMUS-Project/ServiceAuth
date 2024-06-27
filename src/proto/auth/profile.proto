@@ -9,6 +9,7 @@ service ProfileService {
     rpc UpdateProfile (UpdateProfileRequest) returns (UpdateProfileResponse);
     rpc GetTenantProfile (GetTenantProfileRequest) returns (GetTenantProfileResponse);
     rpc UpdateTenantProfile (UpdateTenantProfileRequest) returns (UpdateTenantProfileResponse);
+    rpc GetAllUserProfile(GetAllUserProfileRequest) returns (GetAllUserProfileResponse);
 }
 
 message GetProfileRequest {
@@ -84,4 +85,12 @@ message UpdateTenantProfileRequest {
 
 message UpdateTenantProfileResponse {
     TenantProfile tenantprofile = 1;
+}
+
+message GetAllUserProfileRequest{
+    userToken.User user = 1;
+}
+
+message GetAllUserProfileResponse{
+    repeated GetProfileResponse users = 1;
 }

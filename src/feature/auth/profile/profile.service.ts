@@ -2,10 +2,24 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { User } from 'src/models/user/interface/user.interface';
 import { Profile } from 'src/models/user/interface/profile.interface';
-import { IGetProfileResponse, IGetTenantProfileResponse, IUpdateProfileResponse, IUpdateTenantProfileRequest, IUpdateTenantProfileResponse } from './interface/profile.interface';
-import { GrpcInternalException, GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
+import {
+    IGetAllUserProfileRequest,
+    IGetAllUserProfileResponse,
+    IGetProfileResponse,
+    IGetTenantProfileResponse,
+    IUpdateProfileResponse,
+    IUpdateTenantProfileRequest,
+    IUpdateTenantProfileResponse,
+} from './interface/profile.interface';
+import {
+    GrpcInternalException,
+    GrpcPermissionDeniedException,
+    GrpcUnauthenticatedException,
+} from 'nestjs-grpc-exceptions';
 import { TenantProfile } from 'src/models/tenant/interface/profile.interface';
 import { Tenant } from 'src/models/tenant/interface/user.interface';
+import { getEnumKeyByEnumValue } from 'src/util/convert_enum/get_key_enum';
+import { Role } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class ProfileService {
@@ -39,7 +53,7 @@ export class ProfileService {
                     address,
                     gender,
                     name,
-                    username
+                    username,
                 };
             }
             throw new GrpcInternalException('INTERNAL_ERROR');
@@ -52,10 +66,11 @@ export class ProfileService {
         try {
             // console.log(email, domain);
             // check if user exists
-            const tenantprofile = await this.TenantProfile.findOne({ email,is_verify: true });
+            const tenantprofile = await this.TenantProfile.findOne({ email, is_verify: true });
 
             if (!tenantprofile) throw new GrpcUnauthenticatedException('TENANT_PROFILE_NOT_FOUND');
-            if (!tenantprofile.is_verify) throw new GrpcUnauthenticatedException('TENANT_NOT_VERIFIED');
+            if (!tenantprofile.is_verify)
+                throw new GrpcUnauthenticatedException('TENANT_NOT_VERIFIED');
 
             return {
                 tenantprofile: {
@@ -76,14 +91,10 @@ export class ProfileService {
                     createdAt: String(tenantprofile.createdAt),
                 },
             };
-
-        }
-        catch (error) {
+        } catch (error) {
             throw error;
         }
     }
-
-
 
     async updateProfile(
         email: string,
@@ -110,18 +121,24 @@ export class ProfileService {
                 throw new GrpcInternalException('UPDATE_PROFILE_FAILED');
             } else {
                 // update user
-                const updateUser = await this.User.updateOne({ _id: user._id }, {username: data['username']});
+                const updateUser = await this.User.updateOne(
+                    { _id: user._id },
+                    { username: data['username'] },
+                );
 
-            if (updateUser.modifiedCount === 0) {
-                throw new GrpcInternalException('UPDATE_USERNAME_USER_FAILED');
-            }}
+                if (updateUser.modifiedCount === 0) {
+                    throw new GrpcInternalException('UPDATE_USERNAME_USER_FAILED');
+                }
+            }
             return { result: 'success' };
         } catch (error) {
             throw error;
         }
     }
 
-    async updateTenantProfile(data: IUpdateTenantProfileRequest): Promise<IUpdateTenantProfileResponse> {
+    async updateTenantProfile(
+        data: IUpdateTenantProfileRequest,
+    ): Promise<IUpdateTenantProfileResponse> {
         try {
             const tenantExist = await this.TenantProfile.findOne({
                 domain: data.user.domain,
@@ -134,7 +151,10 @@ export class ProfileService {
                 throw new GrpcUnauthenticatedException('TENANT_NOT_VERIFIED');
             }
 
-            const updateTenant = await this.TenantProfile.updateOne({ domain: data.user.domain, email: data.user.email }, data);
+            const updateTenant = await this.TenantProfile.updateOne(
+                { domain: data.user.domain, email: data.user.email },
+                data,
+            );
 
             if (updateTenant.modifiedCount === 0) {
                 throw new GrpcUnauthenticatedException('TENANT_NOT_UPDATED');
@@ -164,8 +184,51 @@ export class ProfileService {
                     createdAt: String(updatedTenantProfile.createdAt),
                 },
             };
-        }   
-        catch (error) {
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getAllUserProfile(data: IGetAllUserProfileRequest): Promise<IGetAllUserProfileResponse> {
+        const { user } = data;
+
+        if (user.role.toString() !== getEnumKeyByEnumValue(Role, Role.TENANT)) {
+            throw new GrpcUnauthenticatedException('PERMISSION_DENIED');
+        }
+
+        try {
+            if (user.domain === '') throw new GrpcUnauthenticatedException('DOMAIN_IS_EMPTY');
+
+            // Get all users in the User collection by domain
+            const users = await this.User.find({ domain: user.domain, is_deleted: false }).populate(
+                'profile_id',
+            );
+
+            // Map the users to the response format
+            const response = users.map(user => {
+                const { email, domain, role, profile_id } = user;
+                if (typeof profile_id !== 'string') {
+                    const { age, phone, address, gender, name, username } = profile_id;
+
+                    return {
+                        email,
+                        role,
+                        username,
+                        domain,
+                        phone,
+                        address,
+                        name,
+                        gender,
+                        age,
+                    };
+                }
+            });
+
+            return {
+                users: response,
+            };
+            throw new GrpcInternalException('INTERNAL_ERROR');
+        } catch (error) {
             throw error;
         }
     }

@@ -1,4 +1,6 @@
 import {
+    GetAllUserProfileRequest,
+    GetAllUserProfileResponse,
     GetProfileRequest,
     GetProfileResponse,
     GetTenantProfileRequest,
@@ -20,3 +22,9 @@ export interface IUpdateProfileResponse extends UpdateProfileResponse.AsObject {
 
 export interface IUpdateTenantProfileRequest extends UpdateTenantProfileRequest.AsObject {}
 export interface IUpdateTenantProfileResponse extends UpdateTenantProfileResponse.AsObject {}
+
+export interface IGetAllUserProfileRequest extends GetAllUserProfileRequest.AsObject {}
+export interface IGetAllUserProfileResponse
+    extends Omit<GetAllUserProfileResponse.AsObject, 'usersList'> {
+    users: IGetProfileResponse[];
+}
