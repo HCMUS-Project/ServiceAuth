@@ -33,6 +33,11 @@ export class ProfileController {
         return await this.profileService.updateProfile(user.email, user.domain, dataUpdate);
     }
 
+    @GrpcMethod('ProfileService', 'UpdateTenantProfile')
+    async updateTenantProfile(data: IUpdateTenantProfileRequest): Promise<IUpdateTenantProfileResponse> {
+        return await this.profileService.updateTenantProfile(data);
+    }
+
     @GrpcMethod('ProfileService', 'GetAllUserProfile')
     async getAllUserProfile(data: IGetAllUserProfileRequest): Promise<IGetAllUserProfileResponse> {
         // console.log(data)

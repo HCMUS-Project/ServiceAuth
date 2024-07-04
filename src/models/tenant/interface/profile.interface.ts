@@ -13,6 +13,7 @@ export interface TenantProfile extends Document {
     readonly domain: string;
     readonly companyName: string;
     readonly companyAddress: string;
+    readonly description: string;
 
     readonly is_verify: boolean;
     readonly createdAt: Date;

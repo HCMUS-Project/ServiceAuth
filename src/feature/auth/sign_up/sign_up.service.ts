@@ -94,6 +94,7 @@ export class SignUpService {
                     companyName: data.companyName,
                     companyAddress: data.companyAddress,
                     address: '123 abc, phuong X, quan Y, thanh pho Z',
+                    description: 'detail to talk about your service you provide',
                     age: 18,
                     gender: 'unknown',
                     avatar: 'none',

@@ -52,11 +52,14 @@ export const TenantProfileSchema = new mongoose.Schema<ProfileInterface>(
             type: String,
             required: true,
         },
+        description: {
+            type: String,
+            required: true,
+        },
         is_verify: {
             type: Boolean,
             default: false,
         },
-
     },
     { timestamps: true },
 );

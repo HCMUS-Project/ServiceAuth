@@ -89,6 +89,7 @@ export class ProfileService {
                     domain: tenantprofile.domain,
                     isVerify: String(tenantprofile.is_verify),
                     createdAt: String(tenantprofile.createdAt),
+                    description: tenantprofile.description
                 },
             };
         } catch (error) {
@@ -182,6 +183,7 @@ export class ProfileService {
                     domain: updatedTenantProfile.domain,
                     isVerify: String(updatedTenantProfile.is_verify),
                     createdAt: String(updatedTenantProfile.createdAt),
+                    description: updatedTenantProfile.description
                 },
             };
         } catch (error) {

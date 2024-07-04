@@ -43,7 +43,8 @@ message TenantProfile {
     string company_address = 11;
     string created_at = 12;
     string is_verify = 13;
-    string domain = 14;
+    string description = 14;
+    string domain = 15;
 }
 
 
@@ -81,6 +82,7 @@ message UpdateTenantProfileRequest {
     optional string company_name = 9;
     optional string company_address = 10;
     optional string domain = 11;
+    optional string description = 12;
 }
 
 message UpdateTenantProfileResponse {
