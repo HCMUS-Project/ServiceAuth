@@ -7,6 +7,8 @@ package verifyAccount;
 service VerifyAccountService {
     rpc VerifyAccount(VerifyAccountRequest) returns (VerifyAccountResponse);
     rpc SendMailOtp(SendMailRequest) returns (SendMailResponse);
+    rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+    rpc sendMailForgotPassword(SendMailRequest) returns (SendMailResponse);
 }
 
 message VerifyAccountRequest {
@@ -27,5 +29,17 @@ message SendMailRequest {
 }
 
 message SendMailResponse {
+    string result = 1;
+}
+
+message ForgotPasswordRequest {
+    string email = 1;
+    optional string domain = 2;
+    string otp = 3;
+    optional userToken.Role role = 4;
+    string newpassword = 5;
+}
+
+message ForgotPasswordResponse {
     string result = 1;
 }
