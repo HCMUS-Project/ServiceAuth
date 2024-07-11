@@ -11,4 +11,6 @@ export interface User extends Document {
     readonly is_deleted: boolean;
     readonly is_active: boolean;
     readonly profile_id: Profile | string;
+    readonly createdAt?: Date;
+    readonly updatedAt?: Date;
 }

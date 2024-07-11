@@ -34,7 +34,7 @@ export class ProfileService {
         try {
             if (domain == undefined) throw new GrpcUnauthenticatedException('DOMAIN_IS_UNDEFINED');
             // check if user exists
-            const user = await this.User.findOne({ email, domain, is_deleted: false }).populate(
+            const user = await this.User.findOne({ email, domain, is_deleted: false}).populate(
                 'profile_id',
             );
 
@@ -43,7 +43,7 @@ export class ProfileService {
 
             const { role, profile_id } = user;
             if (typeof profile_id !== 'string') {
-                const { age, phone, address, gender, name, username } = profile_id;
+                const { age, phone, address, gender, name, username, createdAt, updatedAt } = profile_id;
                 return {
                     email,
                     domain,
@@ -54,6 +54,7 @@ export class ProfileService {
                     gender,
                     name,
                     username,
+                    createdAt: createdAt.toISOString()
                 };
             }
             throw new GrpcInternalException('INTERNAL_ERROR');
@@ -202,7 +203,7 @@ export class ProfileService {
             if (user.domain === '') throw new GrpcUnauthenticatedException('DOMAIN_IS_EMPTY');
 
             // Get all users in the User collection by domain
-            const users = await this.User.find({ domain: user.domain, is_deleted: false }).populate(
+            const users = await this.User.find({ domain: user.domain, is_deleted: false, is_active: true }).populate(
                 'profile_id',
             );
 
@@ -210,7 +211,7 @@ export class ProfileService {
             const response = users.map(user => {
                 const { email, domain, role, profile_id } = user;
                 if (typeof profile_id !== 'string') {
-                    const { age, phone, address, gender, name, username } = profile_id;
+                    const { age, phone, address, gender, name, username, createdAt } = profile_id;
 
                     return {
                         email,
@@ -222,6 +223,7 @@ export class ProfileService {
                         name,
                         gender,
                         age,
+                        createdAt: createdAt.toISOString()
                     };
                 }
             });
@@ -229,7 +231,6 @@ export class ProfileService {
             return {
                 users: response,
             };
-            throw new GrpcInternalException('INTERNAL_ERROR');
         } catch (error) {
             throw error;
         }
