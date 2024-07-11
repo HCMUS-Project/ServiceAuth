@@ -31,7 +31,7 @@ export class VerifyAccountController {
     }
 
     @GrpcMethod('VerifyAccountService', 'sendMailForgotPassword')
-    async sendEmailForgotPassword(data: ISendMailRequest): Promise<ISendMailResponse> {
+    async sendMailForgotPassword(data: ISendMailRequest): Promise<ISendMailResponse> {
         return await this.verifyAccountService.sendMailForgotPassword(data);
     }
 }
