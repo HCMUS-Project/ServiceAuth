@@ -98,15 +98,17 @@ export class VerifyAccountService {
             if (data.domain == undefined)
                 throw new GrpcUnauthenticatedException('DOMAIN_IS_UNDEFINED');
         }
-        
+
         // Check if the account exists
-        let account = ""
-        if (data.domain === "") {
+        let account: User | Tenant | null;
+        if (data.domain === '') {
             account = await model.findOne({
                 email: data.email,
             });
-        }
-        else {
+            if (account) {
+                data.domain = account.domain;
+            }
+        } else {
             account = await model.findOne({
                 email: data.email,
                 domain: data.domain,
@@ -128,7 +130,7 @@ export class VerifyAccountService {
         await model.updateOne(
             {
                 email: data.email,
-                domain: domain,
+                domain: data.domain,
             },
             {
                 password: hashpassword,
@@ -172,7 +174,7 @@ export class VerifyAccountService {
             } else if (data.role.toString() === getEnumKeyByEnumValue(Role, Role.ADMIN)) {
                 accountType = AccountType.Admin;
             }
-            console.log(data.newpassword, data.email, data.domain)
+            console.log(data.newpassword, data.email, data.domain);
             return this.resetPasswordType(data, accountType);
         } catch (error) {
             throw error;
@@ -190,7 +192,7 @@ export class VerifyAccountService {
             if (data.domain == undefined)
                 throw new GrpcUnauthenticatedException('DOMAIN_IS_UNDEFINED');
         }
-        console.log(data.email, data.domain)
+        console.log(data.email, data.domain);
         // Check if the account exists
         let account = await model.findOne({
             email: data.email,
@@ -241,7 +243,7 @@ export class VerifyAccountService {
 
     async sendMailOtpForgotPasswordType(data: ISendMailRequest, accountType: AccountType) {
         const model = this.getModel(accountType);
-        console.log(model, "------------------")
+        console.log(model, '------------------');
         // If Admin or Tenant, domain is "", cause new account Tenant dont have domain
         if (accountType === 'Admin' || accountType === 'Tenant') {
             data.domain = '';
@@ -252,14 +254,13 @@ export class VerifyAccountService {
         }
 
         // Check if the account exists
-        console.log(data.email, data.domain)
-        let account = ""
-        if(data.domain === "") {
+        console.log(data.email, data.domain);
+        let account = '';
+        if (data.domain === '') {
             account = await model.findOne({
                 email: data.email,
             });
-        }
-        else{
+        } else {
             account = await model.findOne({
                 email: data.email,
                 domain: data.domain,
@@ -273,7 +274,7 @@ export class VerifyAccountService {
         // Generate OTP
         const otp = generateOtp(6);
         this.cacheManager.set(`otp:${data.email}/resetpassword`, otp, { ttl: 300 });
-        
+
         // Send OTP to account
         await this.mailerService.sendMail({
             to: data.email,
